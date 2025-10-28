@@ -1,5 +1,10 @@
-// 규칙: 기본 3km 달성 시 빵 4개, 이후 1km 당 +1개
+// 규칙: 1km 중 30% 돌파 시 1개, 60% 돌파 시 1개, 100% 돌파 시 2개 추가
 export function calcBread(distanceKm: number) {
-  if (distanceKm < 3) return 0;
-  return 4 + Math.floor(distanceKm - 3);
+  const goal = 1; // 목표 1km
+  const progress = distanceKm / goal;
+
+  if (progress < 0.3) return 0; // 0~29%
+  if (progress < 0.6) return 1; // 30~59%
+  if (progress < 1.0) return 2; // 60~99%
+  return 4; // 100% 이상
 }

@@ -15,7 +15,7 @@ export function haversine(a: LatLng, b: LatLng) {
   return 2 * R * Math.asin(Math.sqrt(h)); // km
 }
 
-// polyline 누적거리(km)
+//  누적거리(km)
 export function polylineDistance(points: LatLng[]) {
   let d = 0;
   for (let i = 1; i < points.length; i++) d += haversine(points[i - 1], points[i]);

@@ -6,7 +6,7 @@ export const theme = {
     textSecondary: "#374151",
     line: "#E5E7EB",
     surface: "#F3F4F6",
-    accent: "#6a480eff",
+    accent: "#FF8A00",
     accentMuted: "#f8cb7dff",
   },
   spacing: {
