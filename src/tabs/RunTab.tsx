@@ -1,27 +1,25 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { View, Alert } from "react-native";
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
-import PreRunOverlay from "../components/run/PreRunOverlay";
-import InRunOverlay from "../components/run/InRunOverlay";
-import { polylineDistance } from "../components/run/utils/geo";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import PreRunOverlay from "../../components/run/PreRunOverlay";
+import InRunOverlay from "../../components/run/InRunOverlay";
+import { polylineDistance } from "../../components/run/utils/geo";
+import { calcBread } from "../../components/run/utils/carrot";
 
-// ✅ require/정적 import 둘 다 OK (안드 대소문자 경로 주의)
-import MarkerImg from "../../assets/Images/marker.png";
-import BreadImg from "../../assets/Images/bread.png";
+// 마커 이미지는 나중에 추가 예정
+// import MarkerImg from "../../../assets/Images/marker.png";
+// import BreadImg from "../../../assets/Images/bread.png";
 
 type LatLng = { latitude: number; longitude: number };
 type RunState = "idle" | "running" | "paused" | "finished";
 
-// === 규칙 함수 (요청 주신 형태 유지)
-export function calcBread(distanceKm: number) {
-  const goal = 0.4;
-  const progress = distanceKm / goal;
-  if (progress < 0.3) return 0;
-  if (progress < 0.6) return 1;
-  if (progress < 1.0) return 2;
-  return 4;
-}
+type RunTabRouteParams = {
+  Run: {
+    autoStart?: boolean;
+  };
+};
 
 // === 유틸: 거리/보간 ===
 const toRad = (d: number) => (d * Math.PI) / 180;
@@ -66,6 +64,10 @@ function genNextTrio(baseKm: number) {
 }
 
 export default function RunTab() {
+  const navigation = useNavigation();
+  const route = useRoute<RouteProp<RunTabRouteParams, "Run">>();
+  const autoStart = route.params?.autoStart ?? false;
+
   const mapRef = useRef<MapView>(null);
   const [state, setState] = useState<RunState>("idle");
   const [path, setPath] = useState<LatLng[]>([]);
@@ -79,6 +81,19 @@ export default function RunTab() {
   const [targets, setTargets] = useState<{ km: number; count: number }[]>(genNextTrio(0));
   const [fired, setFired] = useState<Record<string, number>>({});
 
+  const startRun = useCallback(async () => {
+    setState("running");
+    setStartTs(Date.now());
+    const sub = await Location.watchPositionAsync(
+      { accuracy: Location.Accuracy.Highest, distanceInterval: 2, timeInterval: 1000 },
+      (loc) => {
+        const p = { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
+        setPath((prev) => (prev.length ? [...prev, p] : [p]));
+      }
+    );
+    setWatchSub(sub);
+  }, []);
+
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -90,9 +105,16 @@ export default function RunTab() {
       const here: LatLng = { latitude: cur.coords.latitude, longitude: cur.coords.longitude };
       mapRef.current?.animateCamera({ center: here, zoom: 16 });
       setPath([here]);
+
+      // autoStart가 true이면 즉시 러닝 시작
+      if (autoStart) {
+        setTimeout(() => {
+          startRun();
+        }, 500); // 약간의 딜레이를 두어 지도가 로드된 후 시작
+      }
     })();
     return () => { watchSub?.remove(); };
-  }, []);
+  }, [autoStart, startRun]);
 
   useEffect(() => {
     if (state !== "running" || !startTs) return;
@@ -114,19 +136,6 @@ export default function RunTab() {
     return Math.round(durationSec / distanceKm);
   }, [distanceKm, durationSec]);
 
-  const startRun = async () => {
-    setState("running");
-    setStartTs(Date.now());
-    const sub = await Location.watchPositionAsync(
-      { accuracy: Location.Accuracy.Highest, distanceInterval: 2, timeInterval: 1000 },
-      (loc) => {
-        const p = { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
-        setPath((prev) => (prev.length ? [...prev, p] : [p]));
-      }
-    );
-    setWatchSub(sub);
-  };
-
   const pauseRun = () => {
     if (state === "running") {
       setState("paused");
@@ -142,7 +151,15 @@ export default function RunTab() {
     watchSub?.remove();
     setState("finished");
     setPauseStart(null);
-    Alert.alert("러닝 종료", `거리 ${distanceKm.toFixed(2)}km, 시간 ${durationSec}s`);
+    
+    // 완료 화면으로 이동
+    const carrotCount = calcBread(distanceKm);
+    (navigation as any).navigate("RunComplete", {
+      distanceKm,
+      durationSec,
+      paceSecPerKm,
+      carrotCount,
+    });
   };
 
   const here = path[path.length - 1];
@@ -211,25 +228,27 @@ export default function RunTab() {
           <Polyline coordinates={path} strokeWidth={10} strokeColor="#FFD360" zIndex={0} />
         ) : null}
 
-        {/* 🥖 빵 마커들 (image prop 사용) */}
+        {/* 🥖 빵 마커들 */}
         {breadPoints.map((pt, idx) => (
           <Marker
             key={`bread-${idx}-${pt.latitude}-${pt.longitude}`}
             coordinate={pt}
-            image={BreadImg}
             anchor={{ x: 0.5, y: 0.5 }}
             zIndex={9}
-          />
+          >
+            <View style={{ width: 20, height: 20, backgroundColor: "#FFD360", borderRadius: 10 }} />
+          </Marker>
         ))}
 
-        {/* 현재 위치 마커 (image prop 사용) */}
+        {/* 현재 위치 마커 */}
         {here ? (
           <Marker
             coordinate={here}
-            image={MarkerImg}
             anchor={{ x: 0.5, y: 0.5 }}
             zIndex={10}
-          />
+          >
+            <View style={{ width: 24, height: 24, backgroundColor: "#FF8A00", borderRadius: 12 }} />
+          </Marker>
         ) : null}
       </MapView>
 

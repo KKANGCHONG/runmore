@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
-import BottomTabs from './src/navigation/BottomTabs';
+import AppNavigator from './src/navigation/BottomTabs';
 import { Text } from "react-native";
 import { useFonts } from "expo-font"
 
@@ -30,7 +30,7 @@ export default function App() {
 
   return (
     <NavigationContainer>
-      <BottomTabs />
+      <AppNavigator />
     </NavigationContainer>
   );
 }
