@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="4456ccf0-6921-4d61-bb47-9dc3165ae10c" name="변경" comment="">
+      <change afterPath="$PROJECT_DIR$/assets/figma/bell_icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/assets/figma/calendar_icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/assets/figma/carrot_small.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/assets/figma/clock_icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/assets/figma/coin_icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/assets/figma/fire_icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/assets/figma/gear_icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/assets/figma/gift_icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/assets/figma/icon-1.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/assets/figma/progress_bar.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/assets/figma/rabbit_character.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/assets/figma/running_shoe_icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/assets/figma/speaker_icon.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/calendar/AppointmentBottomSheet.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/calendar/CalendarDay.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/calendar/CarrotProgressBar.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/run/RunControls.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/run/RunMetrics.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/components/run/RunProgressBar.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/tabs/CalendarTab.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/tabs/Run/RunCompleteScreen.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.json" beforeDir="false" afterPath="$PROJECT_DIR$/app.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/Images/bread.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/assets/Images/marker.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/home/MonthCalendar.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/home/MonthlyGoal.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/home/TodayAppointment.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/run/InRunOverlay.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/run/InRunOverlay.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/run/utils/bread.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/run/utils/carrot.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/ui/ProgressBar.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/components/ui/ProgressBar.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/navigation/BottomTabs.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/navigation/BottomTabs.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tabs/Home/HomeTab.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/tabs/Home/HomeTab.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/tabs/Run/RunTab.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/tabs/Run/RunTab.tsx" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5
+}</component>
+  <component name="ProjectId" id="35hdyvUGbgrnzWyY3ohX5lZRitJ" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "hyunjung 병합 중",
+    "last_opened_file_path": "C:/Users/LG/RunmoreProject/runmore_frontend",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "C:\\Users\\LG\\RunmoreProject\\runmore_frontend\\node_modules\\typescript\\lib",
+    "vue.rearranger.settings.migration": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\LG\RunmoreProject\runmore_frontend\assets\Home" />
+      <recent name="C:\Users\LG\RunmoreProject\runmore_frontend\src\tabs\Shop" />
+      <recent name="C:\Users\LG\RunmoreProject\runmore_frontend\src\tabs\Run" />
+      <recent name="C:\Users\LG\RunmoreProject\runmore_frontend\src\tabs\Home" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-9823dce3aa75-fbdcb00ec9e3-intellij.indexing.shared.core-IU-251.27812.49" />
+        <option value="bundled-js-predefined-d6986cc7102b-09060db00ec0-JavaScript-IU-251.27812.49" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="디폴트 작업">
+      <changelist id="4456ccf0-6921-4d61-bb47-9dc3165ae10c" name="변경" comment="" />
+      <created>1763566494288</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1763566494288</updated>
+      <workItem from="1763566495613" duration="260000" />
+      <workItem from="1763640888232" duration="1434000" />
+      <workItem from="1763985504984" duration="412000" />
+      <workItem from="1763985960277" duration="5415000" />
+      <workItem from="1764062598716" duration="470000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
