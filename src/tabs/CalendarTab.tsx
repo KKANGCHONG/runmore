@@ -1,12 +1,14 @@
 // src/tabs/CalendarTab.tsx
 import React, { useState, useMemo } from "react";
-import { View, Text, ScrollView, Pressable, StyleSheet, Dimensions } from "react-native";
+import { View, Text, ScrollView, Pressable, StyleSheet, Dimensions, Image } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
 import { useNavigation } from "@react-navigation/native";
 import CalendarDay from "../components/calendar/CalendarDay";
 import AppointmentBottomSheet from "../components/calendar/AppointmentBottomSheet";
+
+const CarrotIcon = require("../../assets/figma/carrot_small.png");
 
 const FIGMA_WIDTH = 390;
 const FIGMA_HEIGHT = 844;
@@ -33,24 +35,11 @@ export default function CalendarTab() {
 
   // 날짜별 상태 관리 (실제로는 AsyncStorage나 API에서 가져올 데이터)
   const [daysState, setDaysState] = useState<Record<string, DayState>>({
-    "2025-11-27": { date: "2025-11-27", isPast: true, carrotCount: 4, appointmentTime: null },
-    "2025-11-28": { date: "2025-11-28", isPast: true, carrotCount: 2, appointmentTime: null },
-    "2025-11-29": { date: "2025-11-29", isPast: true, carrotCount: 2, appointmentTime: null },
-    "2025-11-30": { date: "2025-11-30", isPast: true, carrotCount: 4, appointmentTime: null },
-    "2025-12-01": { date: "2025-12-01", isPast: true, carrotCount: 0, appointmentTime: null },
-    "2025-12-02": { date: "2025-12-02", isPast: true, carrotCount: 2, appointmentTime: null },
-    "2025-12-03": { date: "2025-12-03", isPast: true, carrotCount: 0, appointmentTime: null },
-    "2025-12-06": { date: "2025-12-06", isPast: true, carrotCount: 4, appointmentTime: null },
-    "2025-12-07": { date: "2025-12-07", isPast: true, carrotCount: 1, appointmentTime: null },
-    "2025-12-10": { date: "2025-12-10", isPast: true, carrotCount: 4, appointmentTime: null },
-    "2025-12-11": { date: "2025-12-11", isPast: true, carrotCount: 2, appointmentTime: null },
-    "2025-12-13": { date: "2025-12-13", isPast: true, carrotCount: 1, appointmentTime: null },
-    "2025-12-15": { date: "2025-12-15", isPast: true, carrotCount: 4, appointmentTime: null },
-    "2025-12-17": { date: "2025-12-17", isPast: true, carrotCount: 1, appointmentTime: null },
-    "2025-12-19": { date: "2025-12-19", isPast: true, carrotCount: 1, appointmentTime: null },
-    "2025-12-21": { date: "2025-12-21", isPast: true, carrotCount: 1, appointmentTime: null },
-    "2025-12-22": { date: "2025-12-22", isPast: false, carrotCount: 0, appointmentTime: "오후 3시", appointmentDistance: "3km" },
-    "2025-12-23": { date: "2025-12-23", isPast: false, carrotCount: 0, appointmentTime: "오후 3시", appointmentDistance: "3km" },
+    "2025-11-01": { date: "2025-11-27", isPast: true, carrotCount: 4, appointmentTime: null },
+    "2025-11-03": { date: "2025-11-28", isPast: true, carrotCount: 2, appointmentTime: null },
+    "2025-11-05": { date: "2025-11-29", isPast: true, carrotCount: 2, appointmentTime: null },
+    "2025-11-06": { date: "2025-11-30", isPast: true, carrotCount: 4, appointmentTime: null },
+    "2025-11-20": { date: "2025-12-01", isPast: true, carrotCount: 3, appointmentTime: null },
   });
 
   const today = dayjs();
@@ -74,18 +63,14 @@ export default function CalendarTab() {
 
   // 달력 그리드 생성
   const calendarDays = useMemo(() => {
-    const days: Array<{ date: dayjs.Dayjs; dayOfWeek?: string }> = [];
+    const days: Array<{ date: dayjs.Dayjs }> = [];
     let current = startDate;
-    let isFirstRow = true;
 
     while (current.isBefore(endDate) || current.isSame(endDate)) {
-      const dayIndex = current.day() === 0 ? 6 : current.day() - 1;
       days.push({
         date: current,
-        dayOfWeek: isFirstRow ? DAYS_OF_WEEK[dayIndex] : undefined,
       });
       current = current.add(1, "day");
-      if (current.day() === 1) isFirstRow = false;
     }
 
     return days;
@@ -126,39 +111,52 @@ export default function CalendarTab() {
   return (
     <SafeAreaView edges={["top", "left", "right"]} style={[styles.container, { paddingTop: insets.top }]}>
       {/* 상단 헤더 */}
-      <View style={styles.header}>
-        <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Ionicons name="chevron-back" size={wp(20)} color="#000000" />
-        </Pressable>
-        <View style={styles.titleSection}>
-          <Text style={styles.title}>캘린더</Text>
-          <View style={styles.monthNavigator}>
-            <Pressable
-              onPress={() => {
-                const prevMonth = dayjs(currentMonth).subtract(1, "month");
-                setCurrentMonth(prevMonth.format("YYYY-MM"));
-              }}
-            >
-              <Ionicons name="chevron-back" size={wp(18)} color="#000000" />
-            </Pressable>
-            <Text style={styles.monthText}>
-              {dayjs(currentMonth).format("YYYY년 M월")}
-            </Text>
-            <Pressable
-              onPress={() => {
-                const nextMonth = dayjs(currentMonth).add(1, "month");
-                setCurrentMonth(nextMonth.format("YYYY-MM"));
-              }}
-            >
-              <Ionicons name="chevron-forward" size={wp(18)} color="#000000" />
-            </Pressable>
-          </View>
-        </View>
-        <View style={styles.carrotBadge}>
-          <Text style={styles.carrotIcon}>🥕</Text>
-          <Text style={styles.carrotCount}>34</Text>
-        </View>
+<View style={styles.header}>
+  {/* 1줄: 뒤로가기 + "캘린더" 타이틀 (같은 x축) */}
+  <View style={styles.headerTopRow}>
+    <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
+      <Ionicons name="chevron-back" size={wp(20)} color="#A1968B" />
+    </Pressable>
+
+    <View style={styles.titleSection}>
+      <Text style={styles.title}>캘린더</Text>
+    </View>
+  </View>
+
+  {/* 2줄: 월 텍스트 + 당근 배지 (같은 x축) */}
+  <View style={styles.headerBottomRow}>
+    <View style={styles.monthNavigator}>
+      <Pressable
+        onPress={() => {
+          const prevMonth = dayjs(currentMonth).subtract(1, "month");
+          setCurrentMonth(prevMonth.format("YYYY-MM"));
+        }}
+      >
+        <Ionicons name="chevron-back" size={wp(18)} color="#A1968B" />
+      </Pressable>
+
+      <Text style={styles.monthText}>
+        {dayjs(currentMonth).format("YYYY년 M월")}
+      </Text>
+
+      <Pressable
+        onPress={() => {
+          const nextMonth = dayjs(currentMonth).add(1, "month");
+          setCurrentMonth(nextMonth.format("YYYY-MM"));
+        }}
+      >
+        <Ionicons name="chevron-forward" size={wp(18)} color="#A1968B" />
+      </Pressable>
+    </View>
+      <View style={styles.carrotBadge}>
+        <Image source={CarrotIcon} style={styles.carrotIcon} resizeMode="contain" />
+        <Text style={styles.carrotCount}>34</Text>
       </View>
+    </View>
+</View>
+
+
+    
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* 월별 통계 카드 */}
@@ -184,17 +182,20 @@ export default function CalendarTab() {
               <Text style={styles.statValue}>{monthlyStats.calories}kcal</Text>
             </Text>
           </View>
-          <Ionicons
-            name="chevron-forward"
-            size={wp(16)}
-            color="#A1968B"
-            style={styles.statsArrow}
-          />
+        </View>
+
+        {/* 요일 헤더 */}
+        <View style={styles.weekdayHeader}>
+          {DAYS_OF_WEEK.map((day, index) => (
+            <View key={index} style={styles.weekdayHeaderItem}>
+              <Text style={styles.weekdayHeaderText}>{day}</Text>
+            </View>
+          ))}
         </View>
 
         {/* 달력 그리드 */}
         <View style={styles.calendarGrid}>
-          {calendarDays.map(({ date, dayOfWeek }, index) => {
+          {calendarDays.map(({ date }, index) => {
             const dateStr = date.format("YYYY-MM-DD");
             const dayState = daysState[dateStr] || {
               date: dateStr,
@@ -208,7 +209,6 @@ export default function CalendarTab() {
               <View key={index} style={styles.calendarDayWrapper}>
                 <CalendarDay
                   date={date.date()}
-                  dayOfWeek={dayOfWeek}
                   isPast={dayState.isPast}
                   hasAppointment={!!dayState.appointmentTime}
                   carrotCount={dayState.carrotCount}
@@ -240,21 +240,27 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFBF6",
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: wp(21),
-    paddingVertical: hp(12),
+    paddingHorizontal: wp(18)
   },
+  
+  // 1. chevron-back 아이콘 + "캘린더"를 같은 x축에
+  headerTopRow: {
+    flexDirection: "row",
+    alignItems: "center", // 세로 가운데 정렬 → 같은 높이
+  },
+
   backButton: {
     width: wp(44),
     height: wp(44),
-    alignItems: "center",
+    alignItems: "flex-start",
     justifyContent: "center",
   },
+
   titleSection: {
-    flex: 1,
-    alignItems: "center",
+    position: "absolute",
+    left: "45%",
+    alignItems: "center",   // 가운데 정렬
+    justifyContent: "center",
   },
   title: {
     fontSize: wp(16),
@@ -263,6 +269,15 @@ const styles = StyleSheet.create({
     marginBottom: hp(4),
     fontFamily: "Pretendard-Medium",
   },
+
+  // 2. "YYYY년 M월" + carrotBadge를 같은 x축에
+headerBottomRow: {
+  marginTop: hp(6),
+  flexDirection: "row",
+  alignItems: "center",         // 세로 가운데 → 같은 높이
+  justifyContent: "space-between", // 왼쪽: 월 네비, 오른쪽: 당근 배지
+},
+
   monthNavigator: {
     flexDirection: "row",
     alignItems: "center",
@@ -285,7 +300,6 @@ const styles = StyleSheet.create({
     gap: wp(6),
   },
   carrotIcon: {
-    fontSize: wp(8.707),
     width: wp(8.707),
     height: hp(16),
   },
@@ -303,7 +317,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: wp(12),
     padding: wp(16),
-    marginTop: hp(8),
+    marginTop: hp(16),
     marginBottom: hp(24),
     shadowColor: "#000",
     shadowOffset: { width: 0, height: wp(4) },
@@ -341,6 +355,23 @@ const styles = StyleSheet.create({
     right: wp(16),
     top: "50%",
     marginTop: -wp(8),
+  },
+  weekdayHeader: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
+    width: SCREEN_WIDTH - wp(42), // padding 제외
+    marginBottom: hp(8),
+  },
+  weekdayHeaderItem: {
+    width: wp(45),
+    marginRight: wp(4),
+    alignItems: "center",
+  },
+  weekdayHeaderText: {
+    fontSize: wp(14),
+    color: "#DBD6D1",
+    fontFamily: "Pretendard-Regular",
+    textAlign: "center",
   },
   calendarGrid: {
     flexDirection: "row",

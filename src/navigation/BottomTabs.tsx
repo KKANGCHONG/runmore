@@ -1,5 +1,5 @@
 import { createStackNavigator } from '@react-navigation/stack';
-import HomeTab from '../tabs/HomeTab';
+import HomeTab from '../tabs/Home/HomeTab';
 import RunTab from '../tabs/Run/RunTab';
 import RunCompleteScreen from '../tabs/Run/RunCompleteScreen';
 import ShopTab from '../tabs/Shop/ShopTab';

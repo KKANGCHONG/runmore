@@ -16,14 +16,14 @@ const wp = (px: number) => (px / FIGMA_WIDTH) * SCREEN_WIDTH;
 const hp = (px: number) => (px / FIGMA_HEIGHT) * SCREEN_HEIGHT;
 
 // 사용되는 이미지들
-const GiftIcon = require("../../assets/figma/gift_icon.png");
-const CalendarIcon = require("../../assets/figma/calendar_icon.png");
-const BellIcon = require("../../assets/figma/bell_icon.png");
-const GearIcon = require("../../assets/figma/gear_icon.png");
-const CoinIcon = require("../../assets/figma/coin_icon.png");
-const ProgressBar = require("../../assets/figma/progress_bar.png");
-const CarrotSmall = require("../../assets/figma/carrot_small.png");
-const SpeakerIcon = require("../../assets/figma/speaker_icon.png");
+const GiftIcon = require("../../../assets/figma/gift_icon.png");
+const CalendarIcon = require("../../../assets/figma/calendar_icon.png");
+const BellIcon = require("../../../assets/figma/bell_icon.png");
+const GearIcon = require("../../../assets/figma/gear_icon.png");
+const CoinIcon = require("../../../assets/figma/coin_icon.png");
+const ProgressBar = require("../../../assets/figma/progress_bar.png");
+const CarrotSmall = require("../../../assets/figma/carrot_small.png");
+const SpeakerIcon = require("../../../assets/figma/speaker_icon.png");
 
 export default function HomeTab() {
   const insets = useSafeAreaInsets();

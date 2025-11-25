@@ -14,13 +14,14 @@ export default function CarrotProgressBar({ carrotCount }: Props) {
   return (
     <View style={styles.container}>
       {[0, 1, 2, 3].map((index) => {
-        const isFilled = index < carrotCount;
-        const isTop = index === 0;
-        const isBottom = index === 3;
+        // 아래에서 위로 채우기: index 3이 맨 아래, index 0이 맨 위
+        const isFilled = index >= 4 - carrotCount;
+        const isTop = index === 0; // 화면상 맨 위
+        const isBottom = index === 3; // 화면상 맨 아래
         
-        // 맨 위 칸은 초록색, 나머지는 주황색
+        // 맨 위 칸(실제로는 carrotCount가 4일 때)은 초록색, 나머지는 주황색
         const backgroundColor = isFilled 
-          ? (isTop ? "#62D837" : "#FB8800") 
+          ? (carrotCount === 4 && isTop ? "#62D837" : "#FB8800") 
           : "#F6F4F2";
         
         return (

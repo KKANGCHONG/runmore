@@ -12,7 +12,6 @@ const hp = (px: number) => (px / FIGMA_HEIGHT) * SCREEN_HEIGHT;
 
 type Props = {
   date: number;
-  dayOfWeek?: string;
   isPast: boolean;
   hasAppointment: boolean;
   carrotCount: number; // 0~4
@@ -24,7 +23,6 @@ type Props = {
 
 export default function CalendarDay({
   date,
-  dayOfWeek,
   isPast,
   hasAppointment,
   carrotCount,
@@ -37,16 +35,20 @@ export default function CalendarDay({
   const showAppointment = !isPast && hasAppointment;
   const showProgress = isPast;
 
+  // 오늘 약속 텍스트 색상: 주황색, 다른 날짜: 회색
+  const appointmentTimeStyle = isToday 
+    ? styles.appointmentTimeToday 
+    : styles.appointmentTimeNormal;
+  const appointmentDistanceStyle = isToday 
+    ? styles.appointmentDistanceToday 
+    : styles.appointmentDistanceNormal;
+
   return (
     <Pressable style={styles.container} onPress={onPress}>
-      {/* 오늘 날짜 표시 (초록 원) - 배경으로 */}
-      {isToday && <View style={styles.todayIndicator} />}
-
       {/* 날짜 텍스트 */}
       <View style={styles.dateContainer}>
-        {dayOfWeek && (
-          <Text style={styles.dayOfWeek}>{dayOfWeek}</Text>
-        )}
+        {/* 오늘 날짜 표시 (초록 원) - 날짜 텍스트 뒤에 */}
+        {isToday && <View style={styles.todayIndicator} />}
         <Text style={[styles.dateText, isToday && styles.todayDateText]}>
           {date}
         </Text>
@@ -62,9 +64,9 @@ export default function CalendarDay({
 
         {showAppointment && appointmentTime && (
           <View style={styles.appointmentContainer}>
-            <Text style={styles.appointmentTime}>{appointmentTime}</Text>
+            <Text style={appointmentTimeStyle}>{appointmentTime}</Text>
             {appointmentDistance && (
-              <Text style={styles.appointmentDistance}>{appointmentDistance}</Text>
+              <Text style={appointmentDistanceStyle}>{appointmentDistance}</Text>
             )}
           </View>
         )}
@@ -86,19 +88,18 @@ const styles = StyleSheet.create({
   },
   dateContainer: {
     alignItems: "center",
-    gap: hp(16),
-    minHeight: hp(32),
     justifyContent: "center",
-  },
-  dayOfWeek: {
-    fontSize: wp(14),
-    color: "#DBD6D1",
-    fontFamily: "Pretendard-Regular",
+    minHeight: hp(32),
+    position: "relative",
+    width: "100%",
   },
   dateText: {
     fontSize: wp(14),
     color: "#A1968B",
     fontFamily: "Pretendard-Medium",
+    textAlign: "center",
+    position: "relative",
+    zIndex: 2,
   },
   todayDateText: {
     color: "#FBFAF9",
@@ -106,13 +107,14 @@ const styles = StyleSheet.create({
   },
   todayIndicator: {
     position: "absolute",
-    top: hp(113),
-    left: wp(10),
+    top: "50%",
+    left: "50%",
+    transform: [{ translateX: -wp(12.5) }, { translateY: -wp(12.5) }],
     width: wp(25),
     height: wp(25),
     borderRadius: wp(12.5),
     backgroundColor: "#62D837",
-    zIndex: -1,
+    zIndex: 0,
   },
   bottomArea: {
     width: "100%",
@@ -135,19 +137,37 @@ const styles = StyleSheet.create({
     paddingVertical: hp(2),
     borderRadius: wp(4),
   },
-  appointmentTime: {
+  appointmentTimeToday: {
     fontSize: wp(12),
     fontWeight: "700",
     color: "#F57800",
     fontFamily: "Pretendard-Bold",
     lineHeight: hp(14.4),
+    textAlign: "center",
   },
-  appointmentDistance: {
+  appointmentTimeNormal: {
+    fontSize: wp(12),
+    fontWeight: "700",
+    color: "#84776B",
+    fontFamily: "Pretendard-Bold",
+    lineHeight: hp(14.4),
+    textAlign: "center",
+  },
+  appointmentDistanceToday: {
     fontSize: wp(12),
     fontWeight: "500",
     color: "#FE9800",
     fontFamily: "Pretendard-Medium",
     lineHeight: hp(14.4),
+    textAlign: "center",
+  },
+  appointmentDistanceNormal: {
+    fontSize: wp(12),
+    fontWeight: "500",
+    color: "#A1968B",
+    fontFamily: "Pretendard-Medium",
+    lineHeight: hp(14.4),
+    textAlign: "center",
   },
 });
 

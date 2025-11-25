@@ -1,10 +1,10 @@
 import React, { useMemo, useState } from "react";
 import { SafeAreaView, View, Text, FlatList, Pressable } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { theme } from "../styles/theme"; // 기존 테마 사용 가정
-import { g } from "../styles/globalStyles"; // 컨테이너 padding 등 공용
-import Card from "../components/ui/Card";    // 기존 Card 컴포넌트
-import SectionHeader from "../components/ui/SectionHeader"; // 옵션
+import { theme } from "../../styles/theme"; // 기존 테마 사용 가정
+import { g } from "../../styles/globalStyles"; // 컨테이너 padding 등 공용
+import Card from "../../components/ui/Card";    // 기존 Card 컴포넌트
+import SectionHeader from "../../components/ui/SectionHeader"; // 옵션
 
 type MonthKey = `${number}-${number}`; // e.g., "2025-07"
 
