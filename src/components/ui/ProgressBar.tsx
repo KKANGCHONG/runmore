@@ -1,35 +1,52 @@
 // src/components/ui/ProgressBar.tsx
 import React from "react";
-import { View } from "react-native";
-import { theme } from "../../styles/theme";
+import { View, StyleSheet, Dimensions } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+
+const FIGMA_WIDTH = 390;
+const FIGMA_HEIGHT = 844;
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
+const wp = (px: number) => (px / FIGMA_WIDTH) * SCREEN_WIDTH;
+const hp = (px: number) => (px / FIGMA_HEIGHT) * SCREEN_HEIGHT;
 
 type Props = { progress: number }; // 0~1
 
 export default function ProgressBar({ progress }: Props) {
   // 0~100으로 변환 + 클램프
-  const pct = Math.max(0, Math.min(100, Math.round(progress * 100)));
+  const pct = Math.max(0, Math.min(100, progress * 100));
 
   return (
-    <View style={{ marginTop: 10, alignSelf: "stretch" }}>
+    <View style={styles.container}>
       {/* 트랙 */}
-      <View
-        style={{
-          width: "100%",            // 부모 너비에 맞춰 늘어나게
-          height: 12,
-          borderRadius: 6,
-          backgroundColor: "#E5E7EB",
-          overflow: "hidden",       // 둥근 모서리 안에서 채움이 잘리도록
-        }}
-      >
-        {/* 채움 */}
-        <View
-          style={{
-            width: `${pct}%`,       // 70%면 70%만 채움
-            height: "100%",         // 트랙 높이에 맞춤(이게 없으면 안 보임)
-            backgroundColor: theme.colors.accent,
-          }}
-        />
+      <View style={styles.track}>
+        {/* 채움 - 그라데이션 적용 */}
+        {pct > 0 && (
+          <LinearGradient
+            colors={["#FB8800", "#FFD360"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={[styles.fill, { width: `${pct}%` }]}
+          />
+        )}
       </View>
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    height: hp(20),
+  },
+  track: {
+    width: "100%",
+    height: "100%",
+    borderRadius: wp(999), // 완전히 둥근 모서리
+    backgroundColor: "#F6F4F2",
+    overflow: "hidden",
+  },
+  fill: {
+    height: "100%",
+    borderRadius: wp(999),
+  },
+});

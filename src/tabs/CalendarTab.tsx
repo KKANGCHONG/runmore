@@ -162,7 +162,7 @@ export default function CalendarTab() {
         {/* 월별 통계 카드 */}
         <View style={styles.statsCard}>
           <Text style={styles.statsTitle}>
-            {dayjs(currentMonth).format("M월")} 등재의 기록
+            {dayjs(currentMonth).format("M월")}의 기록
           </Text>
           <View style={styles.statsRow}>
             <Text style={styles.statText}>

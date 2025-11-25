@@ -4,6 +4,8 @@ import { View, Text, Pressable, StyleSheet, Dimensions, Image } from "react-nati
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
+import { Ionicons } from "@expo/vector-icons";
+import ProgressBar from "../../components/ui/ProgressBar";
 
 // Figma 기준 화면 크기
 const FIGMA_WIDTH = 390;
@@ -21,9 +23,9 @@ const CalendarIcon = require("../../../assets/figma/calendar_icon.png");
 const BellIcon = require("../../../assets/figma/bell_icon.png");
 const GearIcon = require("../../../assets/figma/gear_icon.png");
 const CoinIcon = require("../../../assets/figma/coin_icon.png");
-const ProgressBar = require("../../../assets/figma/progress_bar.png");
 const CarrotSmall = require("../../../assets/figma/carrot_small.png");
 const SpeakerIcon = require("../../../assets/figma/speaker_icon.png");
+const RabbitCharacter = require("../../../assets/figma/rabbit_character.png");
 
 export default function HomeTab() {
   const insets = useSafeAreaInsets();
@@ -37,14 +39,12 @@ export default function HomeTab() {
   const level = 1;
   const characterName = "뚱띠토끼";
   const carrotCount = 78;
-  const userName = "등재";
+  const userName = "다인";
   const appointmentMessage = `${userName}님, 오늘 오후 3시에 3km 뛰기로 했어요!`;
+  
+  // 레벨 진행률 계산 (예시: 75%)
+  const levelProgress = 0.75; // 0~1 사이 값
 
-  // 약속 수정 핸들러 (실제로는 모달이나 다른 화면으로 이동)
-  const handleEditAppointment = () => {
-    // TODO: 약속 수정 로직
-    console.log("약속 수정");
-  };
 
   // 약속 설정 핸들러
   const handleSetAppointment = () => {
@@ -57,7 +57,7 @@ export default function HomeTab() {
       {/* 배경 그라데이션 - 약속 설정 여부에 따라 다름 */}
       <LinearGradient
         colors={["#FFFFFF", "#FFF2E0"]}
-        locations={hasAppointment ? [0, 0.8125] : [0, 0.83153]}
+        locations={ [0, 0.8125]}
         style={styles.backgroundGradient}
       />
       
@@ -79,7 +79,7 @@ export default function HomeTab() {
           width: wp(24), 
           height: wp(24) 
         }]}>
-          <Image source={BellIcon} style={{ width: wp(24), height: wp(24) }} resizeMode="contain" />
+          <Image source={BellIcon} style={{ width: wp(22), height: wp(22) }} resizeMode="contain" />
         </Pressable>
 
         {/* 설정 아이콘 - Figma: left-[calc(75%+49.5px)] size-[24px] top-[56px] */}
@@ -89,7 +89,7 @@ export default function HomeTab() {
           width: wp(24), 
           height: wp(24) 
         }]}>
-          <Image source={GearIcon} style={{ width: wp(24), height: wp(24) }} resizeMode="contain" />
+          <Image source={GearIcon} style={{ width: wp(22), height: wp(22) }} resizeMode="contain" />
         </Pressable>
 
         {/* 선물 아이콘 + 텍스트 - Figma: left-[24px] top-[94px] w-[60px] */}
@@ -97,7 +97,7 @@ export default function HomeTab() {
           style={[styles.giftSection, { left: wp(24), top: hp(94), width: wp(60) }]}
           onPress={() => navigation.navigate("Shop" as never)}
         >
-          <Image source={GiftIcon} style={{ width: wp(60), height: wp(60) }} resizeMode="contain" />
+          <Image source={GiftIcon} style={{ width: wp(56), height: wp(56) }} resizeMode="contain" />
           <Text style={styles.iconLabel}>상점</Text>
         </Pressable>
 
@@ -111,88 +111,81 @@ export default function HomeTab() {
           onPress={() => navigation.navigate("Calendar" as never)}
         >
           <View style={styles.calendarIconWrapper}>
-            <Image source={CalendarIcon} style={{ width: wp(60), height: wp(60) }} resizeMode="contain" />
+            <Image source={CalendarIcon} style={{ width: wp(56), height: wp(56) }} resizeMode="contain" />
           </View>
           <Text style={styles.iconLabel}>캘린더</Text>
         </Pressable>
 
-        {/* 약속 알림 배너 - 약속 설정한 경우만 표시 - Figma: left-[calc(50%+4px)] top-[244px] */}
+        {/* 약속 알림 배너 - 약속 설정한 경우만 표시 - Figma: top-[258px] */}
         {hasAppointment && (
           <View style={[styles.appointmentBanner, { 
-            left: SCREEN_WIDTH / 2 + wp(4), 
-            top: hp(244) 
+            left: SCREEN_WIDTH / 2,
+            top: hp(258) 
           }]}>
             <Image source={SpeakerIcon} style={{ width: wp(16), height: wp(16) }} resizeMode="contain" />
             <Text style={styles.appointmentBannerText}>{appointmentMessage}</Text>
+            <Ionicons name="chevron-forward" size={wp(12)} color="#A1968B" />
           </View>
         )}
 
-        {/* 레벨 카드 - Figma: left-[24px] top-[601px] w-[342px] h-[105px] */}
-        <View style={[styles.levelCard, { 
-          left: wp(24), 
-          top: hp(601), 
-          width: wp(342), 
-          height: hp(105) 
-        }]}>
-          {/* 레벨 텍스트 - Figma: left-[100.5px] top-[625px] */}
-          <Text style={[styles.levelText, { left: wp(100.5), top: hp(625 - 601) }]}>
-            Lv {level}. {characterName}
-          </Text>
-
-          {/* 진행 바 - Figma: left-[48px] top-[682px] w-[255.844px] */}
-          <View style={[styles.progressBarContainer, { 
-            left: wp(48), 
-            top: hp(682 - 601), 
-            width: wp(255.844) 
+        {/* 캐릭터 이미지 - Figma: top-[338px], size-[238px] */}
+        {hasAppointment && (
+          <View style={[styles.characterContainer, { 
+            left: SCREEN_WIDTH / 2,
+            top: hp(338) 
           }]}>
-            <Image source={ProgressBar} style={styles.progressBarImage} resizeMode="stretch" />
+            <Image source={RabbitCharacter} style={styles.characterImage} resizeMode="contain" />
+          </View>
+        )}
+
+        {/* 레벨 카드 - Figma: top-[602px] w-[342px] h-[108px] */}
+        <View style={[styles.levelCard, { 
+          left: SCREEN_WIDTH / 2,
+          top: hp(602), 
+          width: wp(342), 
+          height: hp(108) 
+        }]}>
+          {/* 레벨 텍스트와 당근 배지 - 같은 줄 */}
+          <View style={styles.levelRow}>
+            <Text style={styles.levelText}>
+              Lv {level}. {characterName}
+            </Text>
+            <View style={styles.carrotBadge}>
+              <Image source={CarrotSmall} style={{ width: wp(8.707), height: hp(16) }} resizeMode="contain" />
+              <Text style={styles.carrotCount}>{carrotCount}</Text>
+            </View>
           </View>
 
-          {/* 당근 배지 - Figma: left-[calc(75%+8.5px)] top-[621px] */}
-          <View style={[styles.carrotBadge, { 
-            left: SCREEN_WIDTH * 0.75 + wp(8.5), 
-            top: hp(621 - 601) 
-          }]}>
-            <Image source={CarrotSmall} style={{ width: wp(8.707), height: hp(16) }} resizeMode="contain" />
-            <Text style={styles.carrotCount}>{carrotCount}</Text>
+          {/* 진행 바 영역 - Figma: gap-[32px] */}
+          <View style={styles.progressSection}>
+            {/* 진행 바와 텍스트 */}
+            <View style={styles.progressBarRow}>
+              <View style={styles.progressBarWrapper}>
+                <ProgressBar progress={levelProgress} />
+              </View>
+            </View>
           </View>
         </View>
 
         {/* 하단 버튼 영역 - 약속 설정 여부에 따라 분기 */}
         {hasAppointment ? (
-          // 약속 설정한 경우: "약속 수정" + "바로 시작" 두 개 버튼
-          <View style={styles.buttonRow}>
-            {/* 약속 수정 버튼 - Figma: left-[24px] top-[742px] w-[165px] h-[60px] */}
-            <Pressable
-              style={[styles.editButton, { 
-                left: wp(24), 
-                top: hp(742), 
-                width: wp(165), 
-                height: hp(60) 
-              }]}
-              onPress={handleEditAppointment}
-            >
-              <Text style={styles.editButtonText}>약속 수정</Text>
-            </Pressable>
-
-            {/* 바로 시작 버튼 - Figma: left-[calc(50%+6px)] top-[742px] w-[165px] h-[60px] */}
-            <Pressable
-              style={[styles.startButton, { 
-                left: SCREEN_WIDTH / 2 + wp(6), 
-                top: hp(742), 
-                width: wp(165), 
-                height: hp(60) 
-              }]}
-              onPress={() => navigation.navigate("Run" as never, { autoStart: true } as never)}
-            >
-              <Text style={styles.startButtonText}>바로 시작</Text>
-            </Pressable>
-          </View>
+          // 약속 설정한 경우: "바로 시작" 버튼만 - Figma: top-[742px] w-[342px] h-[60px]
+          <Pressable
+            style={[styles.startButton, { 
+              left: SCREEN_WIDTH / 2,
+              top: hp(742), 
+              width: wp(342), 
+              height: hp(60) 
+            }]}
+            onPress={() => (navigation as any).navigate("Run", { autoStart: true })}
+          >
+            <Text style={styles.startButtonText}>바로 시작</Text>
+          </Pressable>
         ) : (
           // 약속 설정하지 않은 경우: "약속 설정" 하나의 버튼
           <Pressable
             style={[styles.setAppointmentButton, { 
-              left: wp(24), 
+              left: SCREEN_WIDTH / 2,
               top: hp(742), 
               width: wp(342), 
               height: hp(60) 
@@ -226,12 +219,13 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 0,
     right: 0,
-    height: hp(0.3),
+    width: SCREEN_WIDTH,
+    height: hp(0.4),
     backgroundColor: "#CEB79A",
     shadowColor: "rgba(129, 101, 66, 0.1)",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 1,
-    shadowRadius: wp(20),
+    shadowRadius: wp(4),
     elevation: 4,
   },
 
@@ -248,7 +242,7 @@ const styles = StyleSheet.create({
   },
 
   temperatureText: {
-    fontSize: wp(14),
+    fontSize: wp(16),
     fontWeight: "600",
     color: "#49393A",
     fontFamily: "Pretendard-SemiBold",
@@ -308,58 +302,120 @@ const styles = StyleSheet.create({
     gap: wp(6),
     backgroundColor: "#FFFFFF",
     borderWidth: wp(1),
-    borderColor: "#FBFAF9", // Figma: gray/1
+    borderColor: "#F9F9F9", // Figma: gray/1
     borderRadius: wp(999),
-    paddingHorizontal: wp(18),
+    paddingHorizontal: wp(22),
     paddingVertical: hp(12),
-    transform: [{ translateX: -wp(171) }], // 중앙 정렬을 위한 보정
+    transform: [{ translateX: -wp(150) }], // 중앙 정렬을 위한 보정
+     shadowColor: "#000",
+    shadowOffset: { width: 0, height: wp(1) },
+    shadowOpacity: 0.08,
+    shadowRadius: wp(3),
+    elevation: wp(10),
   },
 
   appointmentBannerText: {
     fontSize: wp(14),
     fontWeight: "600",
-    color: "#685B4E", // Figma: gray/8
+    color: "#4D4D4D", // Figma: gray/8
     fontFamily: "Pretendard-SemiBold",
+    lineHeight: hp(19.6),
+  },
+
+  characterContainer: {
+    position: "absolute",
+    width: wp(238),
+    height: wp(238),
+    transform: [{ translateX: -wp(119) }], // 중앙 정렬
+  },
+
+  characterImage: {
+    width: "100%",
+    height: "100%",
   },
 
   levelCard: {
     position: "absolute",
     backgroundColor: "#FFFFFF",
     borderRadius: wp(16),
+    paddingHorizontal: wp(24),
+    paddingTop: hp(24),
+    paddingBottom: hp(2),
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: hp(1) },
+    shadowOffset: { width: 0, height: wp(1) },
     shadowOpacity: 0.08,
     shadowRadius: wp(3),
     elevation: 2,
+    transform: [{ translateX: -wp(171) }], // 중앙 정렬
+  },
+
+  levelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: hp(16), // Lv 1 텍스트와 progress bar 사이 간격 (기존: hp(32))
   },
 
   levelText: {
-    position: "absolute",
     fontSize: wp(18),
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#817D7A",
-    fontFamily: "Pretendard-Bold",
+    fontFamily: "Pretendard-SemiBold",
+    lineHeight: hp(25.2),
   },
 
-  progressBarContainer: {
-    position: "absolute",
+  progressSection: {
+    gap: hp(10),
+  },
+
+  progressBarRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: wp(8),
+  },
+
+
+  progressBarWrapper: {
+    flex: 1,
     height: hp(20),
   },
 
-  progressBarImage: {
-    width: "100%",
-    height: "100%",
+  progressDistance: {
+    fontSize: wp(14),
+    fontWeight: "600",
+    color: "#817D7A",
+    fontFamily: "Pretendard-SemiBold",
+    lineHeight: hp(16.8),
+  },
+
+  rewardRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: wp(6),
+  },
+
+  rewardCarrotIcon: {
+    width: wp(12),
+    height: hp(12),
+  },
+
+  rewardText: {
+    fontSize: wp(14),
+    fontWeight: "600",
+    color: "#FB8800",
+    fontFamily: "Pretendard-SemiBold",
+    lineHeight: hp(16.8),
   },
 
   carrotBadge: {
-    position: "absolute",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: wp(6),
     backgroundColor: "#FFF3E0",
     borderWidth: wp(0.5),
-    borderColor: "#F6F4F2", // Figma: gray/2
+    borderColor: "#EBEBEB", // Figma: gray/2
     borderRadius: wp(999),
     paddingHorizontal: wp(10),
     paddingVertical: hp(4),
@@ -367,30 +423,11 @@ const styles = StyleSheet.create({
 
   carrotCount: {
     fontSize: wp(14),
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#F57800", // Figma: orange/8
     fontFamily: "Pretendard-Bold",
   },
 
-  buttonRow: {
-    position: "absolute",
-    flexDirection: "row",
-  },
-
-  editButton: {
-    position: "absolute",
-    backgroundColor: "#FFFFFF",
-    borderRadius: wp(16),
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  editButtonText: {
-    fontSize: wp(18),
-    fontWeight: "600",
-    color: "#FB8800", // Figma: orange/7
-    fontFamily: "Pretendard-SemiBold",
-  },
 
   startButton: {
     position: "absolute",
@@ -398,13 +435,15 @@ const styles = StyleSheet.create({
     borderRadius: wp(16),
     alignItems: "center",
     justifyContent: "center",
+    transform: [{ translateX: -wp(171) }], // 중앙 정렬
   },
 
   startButtonText: {
     fontSize: wp(18),
     fontWeight: "600",
-    color: "#FBFAF9", // Figma: gray/1
+    color: "#F9F9F9", // Figma: gray/1
     fontFamily: "Pretendard-SemiBold",
+    lineHeight: hp(25.2),
   },
 
   setAppointmentButton: {
@@ -413,10 +452,11 @@ const styles = StyleSheet.create({
     borderRadius: wp(16),
     alignItems: "center",
     justifyContent: "center",
+    transform: [{ translateX: -wp(171) }], // 중앙 정렬
   },
 
   setAppointmentButtonText: {
-    fontSize: wp(18),
+    fontSize: wp(16),
     fontWeight: "600",
     color: "#FBFAF9", // Figma: gray/1
     fontFamily: "Pretendard-SemiBold",
