@@ -49,13 +49,10 @@ export default function RunMetrics({ pace, distance, time }: Props) {
 
 const styles = StyleSheet.create({
   container: {
-    position: "absolute",
-    bottom: hp(213),
-    left: wp(24),
-    right: wp(24),
     backgroundColor: "rgba(255, 255, 255, 0.6)",
     borderRadius: wp(10.712),
     padding: wp(13.932),
+    marginBottom: hp(8),
   },
   metricsRow: {
     flexDirection: "row",

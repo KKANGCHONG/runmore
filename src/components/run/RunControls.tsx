@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, Pressable, StyleSheet, Dimensions } from "react-native";
+import RunMetrics from "./RunMetrics";
 
 const FIGMA_WIDTH = 390;
 const FIGMA_HEIGHT = 844;
@@ -11,12 +12,21 @@ type Props = {
   isPaused: boolean;
   onPause: () => void;
   onEnd: () => void;
+  pace: string;
+  distance: string;
+  time: string;
 };
 
-export default function RunControls({ isPaused, onPause, onEnd }: Props) {
+export default function RunControls({ isPaused, onPause, onEnd, pace, distance, time }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.handleBar} />
+
+      {/* 메트릭 카드 (Pace / Distance / Time) */}
+      <View style={styles.metricsWrapper}>
+        <RunMetrics pace={pace} distance={distance} time={time} />
+      </View>
+
       <View style={styles.buttonsRow}>
         <Pressable style={styles.endButton} onPress={onEnd}>
           <Text style={styles.endButtonText}>종료</Text>
@@ -48,6 +58,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: wp(12),
     elevation: 5,
+  },
+  metricsWrapper: {
+    marginBottom: hp(16),
   },
   handleBar: {
     width: wp(56),
