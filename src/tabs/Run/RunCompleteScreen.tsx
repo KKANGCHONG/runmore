@@ -1,14 +1,5 @@
 import React from "react";
-import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-  Dimensions,
-  Image,
-  ScrollView,
-  ImageSourcePropType,
-} from "react-native";
+import { View, Text, Pressable, StyleSheet, Dimensions, ScrollView, ImageSourcePropType } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -29,12 +20,12 @@ type RunCompleteRouteParams = {
   };
 };
 
-// 아이콘 이미지
-const FireIcon = require("../../../assets/figma/fire_icon.png");
-const RunningShoeIcon = require("../../../assets/figma/running_shoe_icon.png");
-const ClockIcon = require("../../../assets/figma/clock_icon.png");
-const CarrotSmall = require("../../../assets/figma/carrot_small.png");
-const RunCompleteRabbit = require("../../../assets/figma/run_complete_rabbit.png");
+// 아이콘 이미지 (SVG)
+import FireIcon from "../../../assets/figma/fire_icon.svg";
+import RunningShoeIcon from "../../../assets/figma/running_shoe_icon.svg";
+import ClockIcon from "../../../assets/figma/clock_icon.svg";
+import CarrotSmall from "../../../assets/figma/carrot_small.svg";
+import RunCompleteRabbit from "../../../assets/figma/run_complete_rabbit.svg";
 
 function formatTime(sec: number) {
   const m = Math.floor(sec / 60);
@@ -93,20 +84,20 @@ function MainCard({
       {/* 당근 획득 배지 */}
       {carrotCount > 0 && (
         <View style={mainCardStyles.carrotBadge}>
-          <Image source={CarrotSmall} style={mainCardStyles.carrotIcon} resizeMode="contain" />
+          <CarrotSmall width={wp(8.707)} height={hp(16)} />
           <Text style={mainCardStyles.carrotText}>당근 {carrotCount}개 획득</Text>
         </View>
       )}
 
       {/* 토끼 캐릭터 이미지 */}
       <View style={mainCardStyles.characterContainer}>
-        <Image source={RunCompleteRabbit} style={mainCardStyles.characterImage} resizeMode="contain" />
+        <RunCompleteRabbit width="100%" height="100%" />
       </View>
 
       {/* 지도 이미지 영역 */}
       {mapImageSource && (
         <View style={mainCardStyles.mapContainer}>
-          <Image source={mapImageSource} style={mainCardStyles.mapImage} resizeMode="cover" />
+          <RunCompleteRabbit width="100%" height="100%" />
         </View>
       )}
 
@@ -114,7 +105,7 @@ function MainCard({
       <View style={mainCardStyles.statsCard}>
         <View style={mainCardStyles.statRow}>
           <View style={mainCardStyles.statLeft}>
-            <Image source={RunningShoeIcon} style={mainCardStyles.statIcon} resizeMode="contain" />
+            <RunningShoeIcon width={wp(18)} height={wp(18)} />
             <Text style={mainCardStyles.statLabelText}>거리</Text>
           </View>
           <Text style={mainCardStyles.statValue}>{formatDistance(totalDistance)}</Text>
@@ -124,7 +115,7 @@ function MainCard({
 
         <View style={mainCardStyles.statRow}>
           <View style={mainCardStyles.statLeft}>
-            <Image source={FireIcon} style={mainCardStyles.statIcon} resizeMode="contain" />
+            <FireIcon width={wp(18)} height={wp(18)} />
             <Text style={mainCardStyles.statLabelText}>페이스</Text>
           </View>
           <Text style={mainCardStyles.statValue}>{formatPace(avgPace)}</Text>
@@ -134,7 +125,7 @@ function MainCard({
 
         <View style={mainCardStyles.statRow}>
           <View style={mainCardStyles.statLeft}>
-            <Image source={ClockIcon} style={mainCardStyles.statIcon} resizeMode="contain" />
+            <ClockIcon width={wp(18)} height={wp(18)} />
             <Text style={mainCardStyles.statLabelText}>시간</Text>
           </View>
           <Text style={mainCardStyles.statValue}>{formatTime(duration)}</Text>

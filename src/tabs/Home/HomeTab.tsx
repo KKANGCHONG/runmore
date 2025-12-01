@@ -17,15 +17,15 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const wp = (px: number) => (px / FIGMA_WIDTH) * SCREEN_WIDTH;
 const hp = (px: number) => (px / FIGMA_HEIGHT) * SCREEN_HEIGHT;
 
-// 사용되는 이미지들
-const GiftIcon = require("../../../assets/figma/gift_icon.png");
-const CalendarIcon = require("../../../assets/figma/calendar_icon.png");
-const BellIcon = require("../../../assets/figma/bell_icon.png");
-const GearIcon = require("../../../assets/figma/gear_icon.png");
-const CoinIcon = require("../../../assets/figma/coin_icon.png");
-const CarrotSmall = require("../../../assets/figma/carrot_small.png");
-const SpeakerIcon = require("../../../assets/figma/speaker_icon.png");
-const RabbitCharacter = require("../../../assets/figma/rabbit_character.png");
+// 사용되는 이미지들 (SVG)
+import GiftIcon from "../../../assets/figma/gift_icon.svg";
+import CalendarIcon from "../../../assets/figma/calendar_icon.svg";
+import BellIcon from "../../../assets/figma/bell_icon.svg";
+import GearIcon from "../../../assets/figma/gear_icon.svg";
+import CoinIcon from "../../../assets/figma/coin_icon.svg";
+import CarrotSmall from "../../../assets/figma/carrot_small.svg";
+import SpeakerIcon from "../../../assets/figma/speaker_icon.svg";
+import RabbitCharacter from "../../../assets/figma/rabbit_character.svg";
 
 export default function HomeTab() {
   const insets = useSafeAreaInsets();
@@ -68,28 +68,38 @@ export default function HomeTab() {
         
         {/* 코인 아이콘 + 온도 - Figma: left-[27px] top-[58px] */}
         <View style={[styles.coinTempContainer, { left: wp(27), top: hp(58) }]}>
-          <Image source={CoinIcon} style={{ width: wp(16), height: wp(16) }} resizeMode="contain" />
+          <CoinIcon width={wp(16)} height={wp(16)} />
           <Text style={styles.temperatureText}>{temperature}℃</Text>
         </View>
 
         {/* 알림 아이콘 - Figma: left-[calc(75%+17.5px)] size-[24px] top-[56px] */}
-        <Pressable style={[styles.bellIconContainer, { 
-          left: SCREEN_WIDTH * 0.75 + wp(17.5), 
-          top: hp(56), 
-          width: wp(24), 
-          height: wp(24) 
-        }]}>
-          <Image source={BellIcon} style={{ width: wp(22), height: wp(22) }} resizeMode="contain" />
+        <Pressable
+          style={[
+            styles.bellIconContainer,
+            {
+              left: SCREEN_WIDTH * 0.75 + wp(17.5),
+              top: hp(56),
+              width: wp(24),
+              height: wp(24),
+            },
+          ]}
+        >
+          <BellIcon width={wp(22)} height={wp(22)} />
         </Pressable>
 
         {/* 설정 아이콘 - Figma: left-[calc(75%+49.5px)] size-[24px] top-[56px] */}
-        <Pressable style={[styles.gearIconContainer, { 
-          left: SCREEN_WIDTH * 0.75 + wp(49.5), 
-          top: hp(56), 
-          width: wp(24), 
-          height: wp(24) 
-        }]}>
-          <Image source={GearIcon} style={{ width: wp(22), height: wp(22) }} resizeMode="contain" />
+        <Pressable
+          style={[
+            styles.gearIconContainer,
+            {
+              left: SCREEN_WIDTH * 0.75 + wp(49.5),
+              top: hp(56),
+              width: wp(24),
+              height: wp(24),
+            },
+          ]}
+        >
+          <GearIcon width={wp(22)} height={wp(22)} />
         </Pressable>
 
         {/* 선물 아이콘 + 텍스트 - Figma: left-[24px] top-[94px] w-[60px] */}
@@ -97,32 +107,40 @@ export default function HomeTab() {
           style={[styles.giftSection, { left: wp(24), top: hp(94), width: wp(60) }]}
           onPress={() => navigation.navigate("Shop" as never)}
         >
-          <Image source={GiftIcon} style={{ width: wp(56), height: wp(56) }} resizeMode="contain" />
+          <GiftIcon width={wp(56)} height={wp(56)} />
           <Text style={styles.iconLabel}>상점</Text>
         </Pressable>
 
         {/* 캘린더 아이콘 + 텍스트 - Figma: left-[calc(75%+13.5px)] top-[94px] w-[60px] */}
         <Pressable
-          style={[styles.calendarSection, { 
-            left: SCREEN_WIDTH * 0.75 + wp(13.5), 
-            top: hp(94), 
-            width: wp(60) 
-          }]}
+          style={[
+            styles.calendarSection,
+            {
+              left: SCREEN_WIDTH * 0.75 + wp(13.5),
+              top: hp(94),
+              width: wp(60),
+            },
+          ]}
           onPress={() => navigation.navigate("Calendar" as never)}
         >
           <View style={styles.calendarIconWrapper}>
-            <Image source={CalendarIcon} style={{ width: wp(56), height: wp(56) }} resizeMode="contain" />
+            <CalendarIcon width={wp(56)} height={wp(56)} />
           </View>
           <Text style={styles.iconLabel}>캘린더</Text>
         </Pressable>
 
         {/* 약속 알림 배너 - 약속 설정한 경우만 표시 - Figma: top-[258px] */}
         {hasAppointment && (
-          <View style={[styles.appointmentBanner, { 
-            left: SCREEN_WIDTH / 2,
-            top: hp(258) 
-          }]}>
-            <Image source={SpeakerIcon} style={{ width: wp(16), height: wp(16) }} resizeMode="contain" />
+          <View
+            style={[
+              styles.appointmentBanner,
+              {
+                left: SCREEN_WIDTH / 2,
+                top: hp(258),
+              },
+            ]}
+          >
+            <SpeakerIcon width={wp(16)} height={wp(16)} />
             <Text style={styles.appointmentBannerText}>{appointmentMessage}</Text>
             <Ionicons name="chevron-forward" size={wp(12)} color="#A1968B" />
           </View>
@@ -134,7 +152,7 @@ export default function HomeTab() {
             left: SCREEN_WIDTH / 2,
             top: hp(338) 
           }]}>
-            <Image source={RabbitCharacter} style={styles.characterImage} resizeMode="contain" />
+            <RabbitCharacter style={styles.characterImage} />
           </View>
         )}
 
@@ -151,7 +169,7 @@ export default function HomeTab() {
               Lv {level}. {characterName}
             </Text>
             <View style={styles.carrotBadge}>
-              <Image source={CarrotSmall} style={{ width: wp(8.707), height: hp(16) }} resizeMode="contain" />
+              <CarrotSmall width={wp(8.707)} height={hp(16)} />
               <Text style={styles.carrotCount}>{carrotCount}</Text>
             </View>
           </View>

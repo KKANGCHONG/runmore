@@ -1,14 +1,13 @@
 // src/tabs/CalendarTab.tsx
 import React, { useState, useMemo } from "react";
-import { View, Text, ScrollView, Pressable, StyleSheet, Dimensions, Image } from "react-native";
+import { View, Text, ScrollView, Pressable, StyleSheet, Dimensions } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import dayjs from "dayjs";
 import { useNavigation } from "@react-navigation/native";
 import CalendarDay from "../components/calendar/CalendarDay";
 import AppointmentBottomSheet from "../components/calendar/AppointmentBottomSheet";
-
-const CarrotIcon = require("../../assets/figma/carrot_small.png");
+import CarrotIcon from "../../assets/figma/carrot_small.svg";
 
 const FIGMA_WIDTH = 390;
 const FIGMA_HEIGHT = 844;
@@ -149,7 +148,7 @@ export default function CalendarTab() {
       </Pressable>
     </View>
       <View style={styles.carrotBadge}>
-        <Image source={CarrotIcon} style={styles.carrotIcon} resizeMode="contain" />
+        <CarrotIcon width={wp(8.707)} height={hp(16)} />
         <Text style={styles.carrotCount}>34</Text>
       </View>
     </View>
