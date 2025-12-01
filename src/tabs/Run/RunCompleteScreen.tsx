@@ -7,6 +7,7 @@ import {
   Dimensions,
   Image,
   ScrollView,
+  ImageSourcePropType,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
@@ -33,6 +34,7 @@ const FireIcon = require("../../../assets/figma/fire_icon.png");
 const RunningShoeIcon = require("../../../assets/figma/running_shoe_icon.png");
 const ClockIcon = require("../../../assets/figma/clock_icon.png");
 const CarrotSmall = require("../../../assets/figma/carrot_small.png");
+const RunCompleteRabbit = require("../../../assets/figma/run_complete_rabbit.png");
 
 function formatTime(sec: number) {
   const m = Math.floor(sec / 60);
@@ -56,6 +58,112 @@ function calculateCalories(distanceKm: number, durationSec: number) {
   return Math.round(distanceKm * caloriesPerKm);
 }
 
+// 메인 카드 컴포넌트 Props 타입
+type MainCardProps = {
+  totalDistance: number; // 총 거리 (km)
+  avgPace: number | null; // 평균 페이스 (초/km)
+  duration: number; // 소요 시간 (초)
+  calories: number; // 칼로리
+  mapImageSource?: ImageSourcePropType; // 지도 스크린샷 이미지
+  goalKm: number; // 목표 거리
+  progressPercent: number; // 달성 퍼센트
+  carrotCount: number; // 당근 개수
+};
+
+// 메인 카드 컴포넌트
+function MainCard({
+  totalDistance,
+  avgPace,
+  duration,
+  calories,
+  mapImageSource,
+  goalKm,
+  progressPercent,
+  carrotCount,
+}: MainCardProps) {
+  return (
+    <View style={mainCardStyles.container}>
+      {/* 목표 달성 텍스트 */}
+      <Text style={mainCardStyles.goalText}>
+        <Text style={mainCardStyles.goalLabel}>목표 {goalKm}km 중 </Text>
+        <Text style={mainCardStyles.goalPercent}>{progressPercent}%</Text>
+        <Text style={mainCardStyles.goalLabel}> 달성!</Text>
+      </Text>
+
+      {/* 당근 획득 배지 */}
+      {carrotCount > 0 && (
+        <View style={mainCardStyles.carrotBadge}>
+          <Image source={CarrotSmall} style={mainCardStyles.carrotIcon} resizeMode="contain" />
+          <Text style={mainCardStyles.carrotText}>당근 {carrotCount}개 획득</Text>
+        </View>
+      )}
+
+      {/* 토끼 캐릭터 이미지 */}
+      <View style={mainCardStyles.characterContainer}>
+        <Image source={RunCompleteRabbit} style={mainCardStyles.characterImage} resizeMode="contain" />
+      </View>
+
+      {/* 지도 이미지 영역 */}
+      {mapImageSource && (
+        <View style={mainCardStyles.mapContainer}>
+          <Image source={mapImageSource} style={mainCardStyles.mapImage} resizeMode="cover" />
+        </View>
+      )}
+
+      {/* 통계 카드 */}
+      <View style={mainCardStyles.statsCard}>
+        <View style={mainCardStyles.statRow}>
+          <View style={mainCardStyles.statLeft}>
+            <Image source={RunningShoeIcon} style={mainCardStyles.statIcon} resizeMode="contain" />
+            <Text style={mainCardStyles.statLabelText}>거리</Text>
+          </View>
+          <Text style={mainCardStyles.statValue}>{formatDistance(totalDistance)}</Text>
+        </View>
+
+        <View style={mainCardStyles.statDivider} />
+
+        <View style={mainCardStyles.statRow}>
+          <View style={mainCardStyles.statLeft}>
+            <Image source={FireIcon} style={mainCardStyles.statIcon} resizeMode="contain" />
+            <Text style={mainCardStyles.statLabelText}>페이스</Text>
+          </View>
+          <Text style={mainCardStyles.statValue}>{formatPace(avgPace)}</Text>
+        </View>
+
+        <View style={mainCardStyles.statDivider} />
+
+        <View style={mainCardStyles.statRow}>
+          <View style={mainCardStyles.statLeft}>
+            <Image source={ClockIcon} style={mainCardStyles.statIcon} resizeMode="contain" />
+            <Text style={mainCardStyles.statLabelText}>시간</Text>
+          </View>
+          <Text style={mainCardStyles.statValue}>{formatTime(duration)}</Text>
+        </View>
+
+        <View style={mainCardStyles.statDivider} />
+
+        <View style={mainCardStyles.statRow}>
+          <View style={mainCardStyles.statLeft}>
+            <Text style={mainCardStyles.sweatIcon}>💧</Text>
+            <Text style={mainCardStyles.statLabelText}>칼로리</Text>
+          </View>
+          <Text style={mainCardStyles.statValue}>{calories}kcal</Text>
+        </View>
+      </View>
+
+      {/* 공유하기 버튼 */}
+      <Pressable style={mainCardStyles.shareButton} onPress={() => {}}>
+        <Text style={mainCardStyles.shareButtonText}>공유하기</Text>
+      </Pressable>
+
+      {/* 이미지 저장하기 버튼 */}
+      <Pressable style={mainCardStyles.saveImageButton} onPress={() => {}}>
+        <Text style={mainCardStyles.saveImageButtonText}>이미지 저장하기</Text>
+      </Pressable>
+    </View>
+  );
+}
+
 export default function RunCompleteScreen() {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<RunCompleteRouteParams, "RunComplete">>();
@@ -67,6 +175,13 @@ export default function RunCompleteScreen() {
   const progressPercent = Math.round((distanceKm / goalKm) * 100);
   const calories = calculateCalories(distanceKm, durationSec);
 
+  // 실제 측정 데이터
+  const totalDistance = distanceKm;
+  const avgPace = paceSecPerKm;
+  const duration = durationSec;
+  // mapImageSource는 나중에 state로 주입할 예정이므로 optional로 처리
+  const mapImageSource: ImageSourcePropType | undefined = undefined;
+
   const handleNewAppointment = () => {
     navigation.navigate("Calendar" as never);
   };
@@ -77,105 +192,67 @@ export default function RunCompleteScreen() {
 
   return (
     <View style={styles.container}>
-      <LinearGradient
-        colors={["#FFF8EF", "#FFF8EF"]}
-        style={styles.backgroundGradient}
-      />
-
-      <SafeAreaView edges={["top"]} style={[styles.content, { paddingTop: insets.top }]}>
+      <SafeAreaView edges={["top", "bottom"]} style={[styles.content, { paddingTop: insets.top }]}>
         {/* 상단 헤더 */}
         <View style={styles.header}>
           <Pressable onPress={handleClose} style={styles.backButton}>
-            <Ionicons name="chevron-back" size={wp(20)} color="#000000" />
+            <Ionicons name="chevron-back" size={wp(20)} color="#A1968B" />
           </Pressable>
-          <Text style={styles.timeText}>9:41</Text>
         </View>
 
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          style={styles.scrollView}
         >
-          {/* 제목 */}
+          {/* 제목 영역 - Figma: top-[76px], top-[104px] */}
           <Text style={styles.subtitle}>뚱띠토끼와 함께한</Text>
           <Text style={styles.title}>오늘의 리포트</Text>
 
-          {/* 당근 획득 배지 */}
-          {carrotCount > 0 && (
-            <View style={styles.carrotBadge}>
-              <Image source={CarrotSmall} style={styles.carrotIcon} resizeMode="contain" />
-              <Text style={styles.carrotText}>당근 {carrotCount}개 획득</Text>
-            </View>
-          )}
-
-          {/* 목표 달성 텍스트 */}
-          <Text style={styles.goalText}>
-            <Text style={styles.goalLabel}>목표 {goalKm}km 중 </Text>
-            <Text style={styles.goalPercent}>{progressPercent}%</Text>
-            <Text style={styles.goalLabel}> 달성!</Text>
-          </Text>
-
-          {/* 캐릭터 이미지 영역 */}
-          <View style={styles.characterContainer}>
-            {/* 캐릭터 이미지는 실제 이미지로 교체 필요 */}
-            <View style={styles.characterPlaceholder} />
-          </View>
-
-          {/* 통계 카드 */}
-          <View style={styles.statsCard}>
-            <View style={styles.statRow}>
-              <View style={styles.statLeft}>
-                <Image source={RunningShoeIcon} style={styles.statIcon} resizeMode="contain" />
-                <Text style={styles.statLabel}>
-                  <Text style={styles.statLabelText}>총 거리</Text>
-                </Text>
-              </View>
-              <Text style={styles.statValue}>{formatDistance(distanceKm)}</Text>
-            </View>
-
-            <View style={styles.statRow}>
-              <View style={styles.statLeft}>
-                <Image source={FireIcon} style={styles.statIcon} resizeMode="contain" />
-                <Text style={styles.statLabel}>
-                  <Text style={styles.statLabelText}>페이스</Text>
-                </Text>
-              </View>
-              <Text style={styles.statValue}>{formatPace(paceSecPerKm)}</Text>
-            </View>
-
-            <View style={styles.statRow}>
-              <View style={styles.statLeft}>
-                <Image source={ClockIcon} style={styles.statIcon} resizeMode="contain" />
-                <Text style={styles.statLabel}>
-                  <Text style={styles.statLabelText}>소요 시간</Text>
-                </Text>
-              </View>
-              <Text style={styles.statValue}>{formatTime(durationSec)}</Text>
-            </View>
-
-            <View style={styles.statRow}>
-              <View style={styles.statLeft}>
-                <Text style={styles.sweatIcon}>💧</Text>
-                <Text style={styles.statLabel}>
-                  <Text style={styles.statLabelText}>소모 칼로리</Text>
-                </Text>
-              </View>
-              <Text style={styles.statValue}>{calories}kcal</Text>
-            </View>
-          </View>
-
-          {/* 추천 메시지 */}
-          <Text style={styles.recommendationText}>다음에는 2km만 뛰어볼까요?</Text>
-
-          {/* 새 약속 잡기 버튼 */}
-          <Pressable style={styles.newAppointmentButton} onPress={handleNewAppointment}>
-            <Text style={styles.newAppointmentButtonText}>새 약속 잡기</Text>
-          </Pressable>
-
-          {/* 종료하기 버튼 */}
-          <Pressable style={styles.closeButton} onPress={handleClose}>
-            <Text style={styles.closeButtonText}>종료하기</Text>
-          </Pressable>
+          {/* 메인 카드 영역 - Rectangle 33115 - Figma: left-[26px] top-[151px] w-[337px] h-[822px] */}
+          <MainCard
+            totalDistance={totalDistance}
+            avgPace={avgPace}
+            duration={duration}
+            calories={calories}
+            mapImageSource={mapImageSource}
+            goalKm={goalKm}
+            progressPercent={progressPercent}
+            carrotCount={carrotCount}
+          />
+          {/* 스크롤 가능한 하단 여백 (하단바 높이만큼) */}
+          <View style={styles.scrollBottomSpacer} />
         </ScrollView>
+
+
+        {/* 하단 고정 바 (ScrollView 위에 overlay) */}
+        <View style={styles.bottomBar} pointerEvents="box-none">
+          {/* 하단 그라데이션 배경 */}
+          <LinearGradient
+            colors={["rgba(255,248,239,0)", "#FFF8EF"]}
+            locations={[0, 0.211]}
+            style={styles.bottomGradient}
+            pointerEvents="none"
+          />
+          
+          {/* 하단 섹션 컨텐츠 */}
+          <View style={styles.bottomContentContainer}>
+            {/* 추천 메시지 */}
+            <Text style={styles.recommendationText}>다음에는 2km만 뛰어볼까요?</Text>
+
+            {/* 새 약속 잡기 버튼 */}
+            <Pressable style={styles.newAppointmentButton} onPress={handleNewAppointment}>
+              <Text style={styles.newAppointmentButtonText}>새 약속 잡기</Text>
+            </Pressable>
+
+            {/* 종료하기 버튼 */}
+            <Pressable style={styles.closeButton} onPress={handleClose}>
+              <Text style={styles.closeButtonText}>종료하기</Text>
+              <Ionicons name="chevron-forward" size={wp(16)} color="#FB8800" style={{ marginLeft: wp(8) }} />
+            </Pressable>
+          </View>
+        </View>
+
       </SafeAreaView>
     </View>
   );
@@ -186,13 +263,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#FFF8EF",
   },
-  backgroundGradient: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
   content: {
     flex: 1,
   },
@@ -200,9 +270,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: wp(24),
-    paddingTop: hp(12),
-    paddingBottom: hp(12),
+    paddingHorizontal: wp(10),
+    paddingTop: hp(0),
+    paddingBottom: hp(0),
   },
   backButton: {
     width: wp(44),
@@ -217,27 +287,152 @@ const styles = StyleSheet.create({
     fontFamily: "Pretendard-SemiBold",
     letterSpacing: wp(-0.5),
   },
-  scrollContent: {
-    paddingHorizontal: wp(26),
-    paddingBottom: hp(100),
+  scrollView: {
+    flex: 1,
   },
+  scrollContent: {
+    paddingBottom: hp(200), // 하단 카드 높이만큼 여백
+  },
+  scrollBottomSpacer: {
+    height: hp(0),
+  },
+
   subtitle: {
     fontSize: wp(16),
     fontWeight: "500",
-    color: "#AE927A",
+    color: "#FB8800",
     fontFamily: "Pretendard-Medium",
     textAlign: "center",
-    marginTop: hp(32),
+    marginTop: hp(0),
     letterSpacing: wp(-0.4),
+    lineHeight: hp(22.4),
   },
   title: {
     fontSize: wp(22),
     fontWeight: "600",
-    color: "#9D7B5E",
+    color: "#FB8800",
     fontFamily: "Pretendard-SemiBold",
     textAlign: "center",
     marginTop: hp(4),
     letterSpacing: wp(-0.55),
+    lineHeight: hp(30.8),
+  },
+
+  // 하단 고정 바 스타일
+  bottomBar: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: SCREEN_WIDTH,
+    zIndex: 5, // ScrollView 위에 overlay
+    overflow: "hidden",
+  },
+  bottomGradient: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: SCREEN_WIDTH,
+    height: "100%",
+    pointerEvents: "none",
+  },
+  bottomContentContainer: {
+    paddingTop: hp(31),
+    paddingBottom: hp(34),
+    paddingHorizontal: wp(0),
+    backgroundColor: "transparent",
+  },
+  recommendationText: {
+    fontSize: wp(16),
+    fontWeight: "600",
+    color: "#765D4B",
+    fontFamily: "Pretendard-SemiBold",
+    textAlign: "left",
+    marginLeft: wp(22),
+    marginBottom: hp(14),
+    letterSpacing: wp(-0.4),
+    lineHeight: hp(19.2),
+  },
+  newAppointmentButton: {
+    backgroundColor: "#FB8800",
+    borderRadius: wp(16),
+    paddingVertical: hp(20.5),
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: hp(0),
+    marginHorizontal: wp(27),
+    height: hp(61),
+  },
+  newAppointmentButtonText: {
+    fontSize: wp(18),
+    fontWeight: "600",
+    color: "#FFFFFF",
+    fontFamily: "Pretendard-SemiBold",
+    letterSpacing: wp(-0.45),
+    lineHeight: hp(25.2),
+  },
+  closeButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: hp(16),
+    alignSelf: "center",
+  },
+  closeButtonText: {
+    fontSize: wp(16),
+    fontWeight: "600",
+    color: "#FB8800",
+    fontFamily: "Pretendard-SemiBold",
+    letterSpacing: wp(-0.4),
+    lineHeight: hp(22.4),
+  },
+});
+
+
+// 메인 카드 스타일 (Figma 디자인 기준)
+const mainCardStyles = StyleSheet.create({
+  container: {
+    width: wp(337),
+    minHeight: hp(822),
+    alignSelf: "center",
+    marginTop: hp(24),
+    backgroundColor: "#FFFFFF",
+    borderRadius: wp(16),
+    borderWidth: wp(1),
+    borderColor: "#EAE5E3",
+    paddingHorizontal: wp(20),
+    paddingTop: hp(24),
+    paddingBottom: hp(20),
+    // 그림자 효과 (Figma 기준)
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: wp(2),
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: wp(8),
+    elevation: 4, // Android
+  },
+  goalText: {
+    fontSize: wp(24),
+    fontWeight: "700",
+    color: "#49393A",
+    fontFamily: "Pretendard-Bold",
+    textAlign: "center",
+    letterSpacing: wp(-0.6),
+    lineHeight: hp(33.6),
+  },
+  goalLabel: {
+    fontWeight: "600",
+    color: "#7F6236",
+    fontFamily: "Pretendard-SemiBold",
+  },
+  goalPercent: {
+    color: "#FE9800",
+    fontWeight: "600",
+    fontFamily: "Pretendard-Bold",
   },
   carrotBadge: {
     flexDirection: "row",
@@ -249,7 +444,7 @@ const styles = StyleSheet.create({
     paddingVertical: hp(6),
     gap: wp(6),
     alignSelf: "center",
-    marginTop: hp(24),
+    marginTop: hp(16),
   },
   carrotIcon: {
     width: wp(8.707),
@@ -261,51 +456,48 @@ const styles = StyleSheet.create({
     color: "#FFA927",
     fontFamily: "Pretendard-Bold",
     letterSpacing: wp(-0.4),
-  },
-  goalText: {
-    fontSize: wp(24),
-    fontWeight: "700",
-    color: "#49393A",
-    fontFamily: "Pretendard-Bold",
-    textAlign: "center",
-    marginTop: hp(24),
-    letterSpacing: wp(-0.6),
-  },
-  goalLabel: {
-    fontWeight: "600",
-    color: "#7F6236",
-    fontFamily: "Pretendard-SemiBold",
-  },
-  goalPercent: {
-    color: "#FE9800",
+    lineHeight: hp(22.4),
   },
   characterContainer: {
-    width: wp(337),
-    height: hp(822),
+    width: wp(280), // width만 지정
+    aspectRatio: 150 / 128, // 원본 비율 유지 (150:128)
     alignSelf: "center",
-    marginTop: hp(24),
-    marginBottom: hp(24),
-    backgroundColor: "#FFFFFF",
-    borderRadius: wp(16),
-    borderWidth: wp(1),
-    borderColor: "#EAE5E3",
-    overflow: "hidden",
+    position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
   },
-  characterPlaceholder: {
-    flex: 1,
-    backgroundColor: "#F6F4F2",
+  characterImage: {
+    width: "100%",
+    height: "100%",
+  },
+  mapContainer: {
+    width: "100%",
+    height: hp(200),
+    marginTop: hp(20),
+    borderRadius: wp(12),
+    overflow: "hidden",
+    backgroundColor: "#F5F5F5",
+  },
+  mapImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: wp(12),
   },
   statsCard: {
     backgroundColor: "#FFFFFF",
     borderRadius: wp(16),
-    padding: wp(18),
-    marginTop: hp(24),
-    gap: hp(10),
+    paddingHorizontal: wp(18),
+    paddingVertical: hp(20),
+    marginTop: hp(-15),
+    width: "100%",
+    alignSelf: "center",
   },
   statRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
+    minHeight: hp(32),
+    paddingVertical: hp(4),
   },
   statLeft: {
     flexDirection: "row",
@@ -317,62 +509,62 @@ const styles = StyleSheet.create({
     height: wp(18),
   },
   sweatIcon: {
-    fontSize: wp(16),
-  },
-  statLabel: {
     fontSize: wp(18),
-    fontWeight: "600",
-    color: "#49393A",
-    fontFamily: "Pretendard-SemiBold",
-    letterSpacing: wp(-0.45),
+    width: wp(18),
+    height: wp(18),
+    textAlign: "center",
   },
   statLabelText: {
-    fontWeight: "500",
+    fontSize: wp(18),
+    fontWeight: "600",
     color: "#767676",
     fontFamily: "Pretendard-Medium",
+    letterSpacing: wp(-0.45),
+    lineHeight: hp(25.2),
   },
   statValue: {
     fontSize: wp(18),
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#F57800",
     fontFamily: "Pretendard-Bold",
     letterSpacing: wp(-0.45),
+    lineHeight: hp(25.2),
   },
-  recommendationText: {
+  statDivider: {
+    height: hp(1),
+    backgroundColor: "#EAE5E3",
+    marginVertical: hp(8),
+    marginHorizontal: wp(-18),
+  },
+  shareButton: {
+    alignSelf: "center",
+    marginTop: hp(20),
+    alignItems: "center",
+  },
+  shareButtonText: {
     fontSize: wp(16),
     fontWeight: "600",
-    color: "#765D4B",
+    color: "#C1B9B0",
     fontFamily: "Pretendard-SemiBold",
-    textAlign: "left",
-    marginTop: hp(24),
     letterSpacing: wp(-0.4),
+    lineHeight: hp(22.4),
+    textDecorationLine: "underline",
   },
-  newAppointmentButton: {
-    backgroundColor: "#FB8800",
-    borderRadius: wp(16),
-    paddingVertical: hp(18),
+  saveImageButton: {
+    alignSelf: "center",
+    marginTop: hp(8),
     alignItems: "center",
-    justifyContent: "center",
-    marginTop: hp(24),
   },
-  newAppointmentButtonText: {
-    fontSize: wp(18),
-    fontWeight: "600",
-    color: "#FFFFFF",
-    fontFamily: "Pretendard-SemiBold",
-    letterSpacing: wp(-0.45),
-  },
-  closeButton: {
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: hp(12),
-  },
-  closeButtonText: {
+  saveImageButtonText: {
     fontSize: wp(16),
     fontWeight: "600",
-    color: "#FB8800",
+    color: "#C1B9B0",
     fontFamily: "Pretendard-SemiBold",
     letterSpacing: wp(-0.4),
+    lineHeight: hp(22.4),
+    textDecorationLine: "underline",
+    
+    
   },
 });
 

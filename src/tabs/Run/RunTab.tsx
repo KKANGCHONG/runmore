@@ -3,7 +3,6 @@ import { View, Alert } from "react-native";
 import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
-import PreRunOverlay from "../../components/run/PreRunOverlay";
 import InRunOverlay from "../../components/run/InRunOverlay";
 import { polylineDistance } from "../../components/run/utils/geo";
 import { calcBread } from "../../components/run/utils/carrot";
@@ -251,8 +250,6 @@ export default function RunTab() {
           </Marker>
         ) : null}
       </MapView>
-
-      {state === "idle" ? <PreRunOverlay onStart={startRun} /> : null}
 
       {(state === "running" || state === "paused") ? (
         <InRunOverlay
