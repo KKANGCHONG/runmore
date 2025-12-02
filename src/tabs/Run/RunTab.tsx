@@ -4,8 +4,10 @@ import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import InRunOverlay from "../../components/run/InRunOverlay";
+import RunCompleteScreen from "./RunCompleteScreen";
 import { polylineDistance } from "../../components/run/utils/geo";
 import { calcBread } from "../../components/run/utils/carrot";
+import { BlurView } from "expo-blur";
 
 // 마커 이미지는 나중에 추가 예정
 // import MarkerImg from "../../../assets/Images/marker.png";
@@ -150,15 +152,6 @@ export default function RunTab() {
     watchSub?.remove();
     setState("finished");
     setPauseStart(null);
-    
-    // 완료 화면으로 이동
-    const carrotCount = calcBread(distanceKm);
-    (navigation as any).navigate("RunComplete", {
-      distanceKm,
-      durationSec,
-      paceSecPerKm,
-      carrotCount,
-    });
   };
 
   const here = path[path.length - 1];
@@ -260,6 +253,36 @@ export default function RunTab() {
           onStop={stopRun}
           runState={state}
         />
+      ) : null}
+
+      {/* 완료 화면 모달 - RunTab 위에 겹쳐서 표시 */}
+      {state === "finished" ? (
+        <>
+          {/* 블러 + 약한 디밍 오버레이 */}
+          <BlurView
+            tint="dark"
+            intensity={20}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 1000,
+            }}
+          />
+          {/* RunCompleteScreen 모달 */}
+          <RunCompleteScreen
+            distanceKm={distanceKm}
+            durationSec={durationSec}
+            paceSecPerKm={paceSecPerKm}
+            carrotCount={calcBread(distanceKm)}
+            onClose={() => {
+              setState("idle");
+              (navigation as any).navigate("Home");
+            }}
+          />
+        </>
       ) : null}
     </View>
   );

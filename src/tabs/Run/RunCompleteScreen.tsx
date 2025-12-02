@@ -74,12 +74,7 @@ function MainCard({
 }: MainCardProps) {
   return (
     <View style={mainCardStyles.container}>
-      {/* 목표 달성 텍스트 */}
-      <Text style={mainCardStyles.goalText}>
-        <Text style={mainCardStyles.goalLabel}>목표 {goalKm}km 중 </Text>
-        <Text style={mainCardStyles.goalPercent}>{progressPercent}%</Text>
-        <Text style={mainCardStyles.goalLabel}> 달성!</Text>
-      </Text>
+      
 
       {/* 당근 획득 배지 */}
       {carrotCount > 0 && (
@@ -100,6 +95,13 @@ function MainCard({
           <RunCompleteRabbit width="100%" height="100%" />
         </View>
       )}
+
+      {/* 목표 달성 텍스트 */}
+      <Text style={mainCardStyles.goalText}>
+        <Text style={mainCardStyles.goalLabel}>목표 {goalKm}km 중 </Text>
+        <Text style={mainCardStyles.goalPercent}>{progressPercent}%</Text>
+        <Text style={mainCardStyles.goalLabel}> 달성!</Text>
+      </Text>
 
       {/* 통계 카드 */}
       <View style={mainCardStyles.statsCard}>
@@ -155,12 +157,25 @@ function MainCard({
   );
 }
 
-export default function RunCompleteScreen() {
+type RunCompleteScreenProps = {
+  distanceKm?: number;
+  durationSec?: number;
+  paceSecPerKm?: number | null;
+  carrotCount?: number;
+  onClose?: () => void;
+};
+
+export default function RunCompleteScreen(props?: RunCompleteScreenProps) {
   const navigation = useNavigation();
   const route = useRoute<RouteProp<RunCompleteRouteParams, "RunComplete">>();
   const insets = useSafeAreaInsets();
 
-  const { distanceKm, durationSec, paceSecPerKm, carrotCount } = route.params;
+  // Props가 있으면 props 사용, 없으면 route params 사용 (기존 네비게이션 방식 지원)
+  const routeParams = route.params;
+  const distanceKm = props?.distanceKm ?? routeParams?.distanceKm ?? 0;
+  const durationSec = props?.durationSec ?? routeParams?.durationSec ?? 0;
+  const paceSecPerKm = props?.paceSecPerKm ?? routeParams?.paceSecPerKm ?? null;
+  const carrotCount = props?.carrotCount ?? routeParams?.carrotCount ?? 0;
 
   const goalKm = 3; // 목표 거리 (예시)
   const progressPercent = Math.round((distanceKm / goalKm) * 100);
@@ -178,11 +193,15 @@ export default function RunCompleteScreen() {
   };
 
   const handleClose = () => {
-    navigation.navigate("Home" as never);
+    if (props?.onClose) {
+      props.onClose();
+    } else {
+      navigation.navigate("Home" as never);
+    }
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, props ? styles.modalContainer : undefined]}>
       <SafeAreaView edges={["top", "bottom"]} style={[styles.content, { paddingTop: insets.top }]}>
         {/* 상단 헤더 */}
         <View style={styles.header}>
@@ -196,9 +215,6 @@ export default function RunCompleteScreen() {
           showsVerticalScrollIndicator={false}
           style={styles.scrollView}
         >
-          {/* 제목 영역 - Figma: top-[76px], top-[104px] */}
-          <Text style={styles.subtitle}>뚱띠토끼와 함께한</Text>
-          <Text style={styles.title}>오늘의 리포트</Text>
 
           {/* 메인 카드 영역 - Rectangle 33115 - Figma: left-[26px] top-[151px] w-[337px] h-[822px] */}
           <MainCard
@@ -217,32 +233,35 @@ export default function RunCompleteScreen() {
 
 
         {/* 하단 고정 바 (ScrollView 위에 overlay) */}
-        <View style={styles.bottomBar} pointerEvents="box-none">
-          {/* 하단 그라데이션 배경 */}
-          <LinearGradient
-            colors={["rgba(255,248,239,0)", "#FFF8EF"]}
-            locations={[0, 0.211]}
-            style={styles.bottomGradient}
-            pointerEvents="none"
-          />
-          
-          {/* 하단 섹션 컨텐츠 */}
-          <View style={styles.bottomContentContainer}>
-            {/* 추천 메시지 */}
-            <Text style={styles.recommendationText}>다음에는 2km만 뛰어볼까요?</Text>
+        {/* Render bottomBar only if props is undefined (not in modal mode) */}
+        {!props && (
+          <View style={styles.bottomBar} pointerEvents="box-none">
+            {/* 하단 그라데이션 배경 */}
+            <LinearGradient
+              colors={["rgba(255,248,239,0)", "#FFF8EF"]}
+              locations={[0, 0.211]}
+              style={styles.bottomGradient}
+              pointerEvents="none"
+            />
+            
+            {/* 하단 섹션 컨텐츠 */}
+            <View style={styles.bottomContentContainer}>
+              {/* 추천 메시지 */}
+              <Text style={styles.recommendationText}>다음에는 2km만 뛰어볼까요?</Text>
 
-            {/* 새 약속 잡기 버튼 */}
-            <Pressable style={styles.newAppointmentButton} onPress={handleNewAppointment}>
-              <Text style={styles.newAppointmentButtonText}>새 약속 잡기</Text>
-            </Pressable>
+              {/* 새 약속 잡기 버튼 */}
+              <Pressable style={styles.newAppointmentButton} onPress={handleNewAppointment}>
+                <Text style={styles.newAppointmentButtonText}>새 약속 잡기</Text>
+              </Pressable>
 
-            {/* 종료하기 버튼 */}
-            <Pressable style={styles.closeButton} onPress={handleClose}>
-              <Text style={styles.closeButtonText}>종료하기</Text>
-              <Ionicons name="chevron-forward" size={wp(16)} color="#FB8800" style={{ marginLeft: wp(8) }} />
-            </Pressable>
+              {/* 종료하기 버튼 */}
+              <Pressable style={styles.closeButton} onPress={handleClose}>
+                <Text style={styles.closeButtonText}>종료하기</Text>
+                <Ionicons name="chevron-forward" size={wp(16)} color="#FB8800" style={{ marginLeft: wp(8) }} />
+              </Pressable>
+            </View>
           </View>
-        </View>
+        )}
 
       </SafeAreaView>
     </View>
@@ -252,7 +271,16 @@ export default function RunCompleteScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFF8EF",
+    backgroundColor: "transparent",
+  },
+  modalContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    zIndex: 1001,
+    backgroundColor: "transparent",
   },
   content: {
     flex: 1,

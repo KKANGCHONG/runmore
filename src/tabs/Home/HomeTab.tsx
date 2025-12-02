@@ -135,7 +135,6 @@ export default function HomeTab() {
             style={[
               styles.appointmentBanner,
               {
-                left: SCREEN_WIDTH / 2,
                 top: hp(258),
               },
             ]}
@@ -315,6 +314,7 @@ const styles = StyleSheet.create({
 
   appointmentBanner: {
     position: "absolute",
+    left: '50%', // 중앙 정렬을 위해 50%
     flexDirection: "row",
     alignItems: "center",
     gap: wp(6),
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
     borderRadius: wp(999),
     paddingHorizontal: wp(22),
     paddingVertical: hp(12),
-    transform: [{ translateX: -wp(150) }], // 중앙 정렬을 위한 보정
+    transform: [{ translateX: '-50%' }], // 자신의 너비의 50%만큼 왼쪽으로 이동
      shadowColor: "#000",
     shadowOffset: { width: 0, height: wp(1) },
     shadowOpacity: 0.08,
