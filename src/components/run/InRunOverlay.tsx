@@ -63,7 +63,8 @@ export default function InRunOverlay({
   return (
     <View pointerEvents="box-none" style={styles.container}>
       {/* 상단 Progress Bar */}
-      <RunProgressBar carrotCount={carrotCount} />
+      <RunProgressBar distanceKm={distanceKm} goalKm={goalKm} />
+
 
       {/* 하단 컨트롤 버튼 */}
       <RunControls
