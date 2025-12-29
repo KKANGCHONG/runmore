@@ -269,6 +269,7 @@ export default function RunTab() {
               right: 0,
               bottom: 0,
               zIndex: 1000,
+              backgroundColor: "rgba(17, 17, 17, 0.5)", // 배경색 추가
             }}
           />
           {/* RunCompleteScreen 모달 */}

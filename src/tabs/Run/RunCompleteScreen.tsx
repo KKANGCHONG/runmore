@@ -1,9 +1,11 @@
 import React from "react";
-import { View, Text, Pressable, StyleSheet, Dimensions, ScrollView, ImageSourcePropType } from "react-native";
+import { View, Text, Pressable, StyleSheet, Dimensions, ScrollView, Image, ImageSourcePropType } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+
 
 const FIGMA_WIDTH = 390;
 const FIGMA_HEIGHT = 844;
@@ -24,8 +26,9 @@ type RunCompleteRouteParams = {
 import FireIcon from "../../../assets/figma/fire_icon.svg";
 import RunningShoeIcon from "../../../assets/figma/running_shoe_icon.svg";
 import ClockIcon from "../../../assets/figma/clock_icon.svg";
+import SweatIcon from "../../../assets/figma/Sweat Droplets.svg";
 import CarrotSmall from "../../../assets/figma/carrot_small.svg";
-import RunCompleteRabbit from "../../../assets/figma/run_complete_rabbit.svg";
+import RunCompleteRabbit from "../../../assets/figma/run_complete_rabbit.png";
 
 function formatTime(sec: number) {
   const m = Math.floor(sec / 60);
@@ -49,113 +52,7 @@ function calculateCalories(distanceKm: number, durationSec: number) {
   return Math.round(distanceKm * caloriesPerKm);
 }
 
-// 메인 카드 컴포넌트 Props 타입
-type MainCardProps = {
-  totalDistance: number; // 총 거리 (km)
-  avgPace: number | null; // 평균 페이스 (초/km)
-  duration: number; // 소요 시간 (초)
-  calories: number; // 칼로리
-  mapImageSource?: ImageSourcePropType; // 지도 스크린샷 이미지
-  goalKm: number; // 목표 거리
-  progressPercent: number; // 달성 퍼센트
-  carrotCount: number; // 당근 개수
-};
 
-// 메인 카드 컴포넌트
-function MainCard({
-  totalDistance,
-  avgPace,
-  duration,
-  calories,
-  mapImageSource,
-  goalKm,
-  progressPercent,
-  carrotCount,
-}: MainCardProps) {
-  return (
-    <View style={mainCardStyles.container}>
-      
-
-      {/* 당근 획득 배지 */}
-      {carrotCount > 0 && (
-        <View style={mainCardStyles.carrotBadge}>
-          <CarrotSmall width={wp(8.707)} height={hp(16)} />
-          <Text style={mainCardStyles.carrotText}>당근 {carrotCount}개 획득</Text>
-        </View>
-      )}
-
-      {/* 토끼 캐릭터 이미지 */}
-      <View style={mainCardStyles.characterContainer}>
-        <RunCompleteRabbit width="100%" height="100%" />
-      </View>
-
-      {/* 지도 이미지 영역 */}
-      {mapImageSource && (
-        <View style={mainCardStyles.mapContainer}>
-          <RunCompleteRabbit width="100%" height="100%" />
-        </View>
-      )}
-
-      {/* 목표 달성 텍스트 */}
-      <Text style={mainCardStyles.goalText}>
-        <Text style={mainCardStyles.goalLabel}>목표 {goalKm}km 중 </Text>
-        <Text style={mainCardStyles.goalPercent}>{progressPercent}%</Text>
-        <Text style={mainCardStyles.goalLabel}> 달성!</Text>
-      </Text>
-
-      {/* 통계 카드 */}
-      <View style={mainCardStyles.statsCard}>
-        <View style={mainCardStyles.statRow}>
-          <View style={mainCardStyles.statLeft}>
-            <RunningShoeIcon width={wp(18)} height={wp(18)} />
-            <Text style={mainCardStyles.statLabelText}>거리</Text>
-          </View>
-          <Text style={mainCardStyles.statValue}>{formatDistance(totalDistance)}</Text>
-        </View>
-
-        <View style={mainCardStyles.statDivider} />
-
-        <View style={mainCardStyles.statRow}>
-          <View style={mainCardStyles.statLeft}>
-            <FireIcon width={wp(18)} height={wp(18)} />
-            <Text style={mainCardStyles.statLabelText}>페이스</Text>
-          </View>
-          <Text style={mainCardStyles.statValue}>{formatPace(avgPace)}</Text>
-        </View>
-
-        <View style={mainCardStyles.statDivider} />
-
-        <View style={mainCardStyles.statRow}>
-          <View style={mainCardStyles.statLeft}>
-            <ClockIcon width={wp(18)} height={wp(18)} />
-            <Text style={mainCardStyles.statLabelText}>시간</Text>
-          </View>
-          <Text style={mainCardStyles.statValue}>{formatTime(duration)}</Text>
-        </View>
-
-        <View style={mainCardStyles.statDivider} />
-
-        <View style={mainCardStyles.statRow}>
-          <View style={mainCardStyles.statLeft}>
-            <Text style={mainCardStyles.sweatIcon}>💧</Text>
-            <Text style={mainCardStyles.statLabelText}>칼로리</Text>
-          </View>
-          <Text style={mainCardStyles.statValue}>{calories}kcal</Text>
-        </View>
-      </View>
-
-      {/* 공유하기 버튼 */}
-      <Pressable style={mainCardStyles.shareButton} onPress={() => {}}>
-        <Text style={mainCardStyles.shareButtonText}>공유하기</Text>
-      </Pressable>
-
-      {/* 이미지 저장하기 버튼 */}
-      <Pressable style={mainCardStyles.saveImageButton} onPress={() => {}}>
-        <Text style={mainCardStyles.saveImageButtonText}>이미지 저장하기</Text>
-      </Pressable>
-    </View>
-  );
-}
 
 type RunCompleteScreenProps = {
   distanceKm?: number;
@@ -202,34 +99,85 @@ export default function RunCompleteScreen(props?: RunCompleteScreenProps) {
 
   return (
     <View style={[styles.container, props ? styles.modalContainer : undefined]}>
-      <SafeAreaView edges={["top", "bottom"]} style={[styles.content, { paddingTop: insets.top }]}>
-        {/* 상단 헤더 */}
-        <View style={styles.header}>
-          <Pressable onPress={handleClose} style={styles.backButton}>
-            <Ionicons name="chevron-back" size={wp(20)} color="#A1968B" />
-          </Pressable>
-        </View>
+  <SafeAreaView edges={["top", "bottom"]} style={[styles.content, { paddingTop: insets.top }]}>
 
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          showsVerticalScrollIndicator={false}
-          style={styles.scrollView}
-        >
+    {/* 상단 헤더 */}
+    <View style={styles.header}>
+      <Pressable onPress={handleClose} style={styles.backButton}>
+        <Ionicons name="chevron-back" size={wp(20)} color="#A1968B" />
+      </Pressable>
+    </View>
 
-          {/* 메인 카드 영역 - Rectangle 33115 - Figma: left-[26px] top-[151px] w-[337px] h-[822px] */}
-          <MainCard
-            totalDistance={totalDistance}
-            avgPace={avgPace}
-            duration={duration}
-            calories={calories}
-            mapImageSource={mapImageSource}
-            goalKm={goalKm}
-            progressPercent={progressPercent}
-            carrotCount={carrotCount}
-          />
-          {/* 스크롤 가능한 하단 여백 (하단바 높이만큼) */}
-          <View style={styles.scrollBottomSpacer} />
-        </ScrollView>
+    {/* 스크롤/배경 영역 */}
+    <ScrollView
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+      style={styles.scrollView}
+    >
+      <View style={styles.scrollBottomSpacer} />
+    </ScrollView>
+
+    {/* ✅ 오버레이 레이어 (ScrollView 밖)
+    <View style={styles.overlayLayer} pointerEvents="box-none">
+      <View style={styles.carrotToast} pointerEvents="none">
+        <CarrotSmall width={wp(16)} height={wp(16)} />
+        <Text style={styles.carrotToastText}>당근 {carrotCount}개 획득</Text>
+      </View>
+
+      <Image source={RunCompleteRabbit} style={styles.runCompleteRabbit} resizeMode="contain" />
+
+      <Text style={styles.progressText}>목표 3km 중 {progressPercent}% 달성!</Text>
+    </View> */}
+
+    <BlurView
+  intensity={35}
+  tint="dark"
+  style={styles.overlayLayer}
+>
+  <View style={styles.carrotToast} pointerEvents="none">
+    <CarrotSmall width={wp(16)} height={wp(16)} />
+    <Text style={styles.carrotToastText}>당근 {carrotCount}개 획득</Text>
+  </View>
+
+  <Image
+    source={RunCompleteRabbit}
+    style={styles.runCompleteRabbit}
+    resizeMode="contain"
+  />
+
+  <Text style={styles.progressText}>
+    목표 3Km 중 {progressPercent}% 달성!
+  </Text>
+</BlurView>
+
+
+    <View style={styles.resultCard}>
+  <View style={styles.resultRow}>
+    <RunningShoeIcon width={wp(18)} height={wp(18)} />
+    <Text style={styles.resultLabel}>거리</Text>
+    <Text style={styles.resultValue}>{distanceKm.toFixed(2)}km</Text>
+  </View>
+
+  <View style={styles.resultRow}>
+    <FireIcon width={wp(18)} height={wp(18)} />
+    <Text style={styles.resultLabel}>페이스</Text>
+    <Text style={styles.resultValue}>
+      {paceSecPerKm ? `${Math.floor(paceSecPerKm / 60)}' ${paceSecPerKm % 60}"` : "-"}
+    </Text>
+  </View>
+
+  <View style={styles.resultRow}>
+    <ClockIcon width={wp(18)} height={wp(18)} />
+    <Text style={styles.resultLabel}>시간</Text>
+    <Text style={styles.resultValue}>{formatTime(durationSec)}</Text>
+  </View>
+
+  <View style={styles.resultRow}>
+    <SweatIcon width={wp(18)} height={wp(18)} />
+    <Text style={styles.resultLabel}>칼로리</Text>
+    <Text style={styles.resultValue}>{calories}kcal</Text>
+  </View>
+</View>
 
 
         {/* 하단 고정 바 (ScrollView 위에 overlay) */}
@@ -310,10 +258,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: hp(200), // 하단 카드 높이만큼 여백
+    // paddingBottom: hp(200), // 하단 카드 높이만큼 여백
   },
   scrollBottomSpacer: {
-    height: hp(0),
+    // height: hp(0),
   },
 
   subtitle: {
@@ -407,183 +355,105 @@ const styles = StyleSheet.create({
     letterSpacing: wp(-0.4),
     lineHeight: hp(22.4),
   },
+  carrotToast: {
+  position: "absolute",
+  left: wp(134),
+  top: hp(104), // 필요하면 + insets.top
+  width: wp(122.71),
+  height: hp(34),
+
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: wp(6),
+
+  backgroundColor: "#FFF2D9",
+  borderRadius: hp(17),
+  zIndex: 9999,
+},
+carrotToastText: {
+  fontSize: wp(14),
+  fontWeight: "600",
+  fontFamily: "Pretendard-SemiBold",
+  color: "#FB8800",
+  letterSpacing: wp(-0.3),
+},
+runCompleteRabbit: {
+  position: "absolute",
+  top: hp(104 + 10),
+  left: 78,
+  right: 0,
+  alignSelf: "center",
+  width: wp(250),
+  height: wp(250),
+  zIndex: 9998,
+},
+
+progressText: {
+  position: "absolute",
+  top: hp(104) + wp(250),
+  left: 0,
+  right: 0,
+
+  textAlign: "center",
+  fontSize: wp(24),
+  fontFamily: "Pretendard-SemiBold",
+  fontWeight: "600",
+  color: "#FFFFFF",
+
+  zIndex: 10000,
+},
+overlayLayer: {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  // 화면 전체를 덮는 오버레이
+  zIndex: 999,
+},
+
+resultCard: {
+  position: "absolute",
+  top: hp(104 + 10) + wp(250) + hp(12) + hp(44), 
+  // = 토끼 + 퍼센트 텍스트 아래
+
+  left: wp(24),
+  right: wp(24),
+
+  backgroundColor: "#9E9E9E",
+  borderRadius: wp(16),
+
+  paddingVertical: hp(18),
+  paddingBottom: hp(10), 
+  paddingHorizontal: wp(18),
+
+  zIndex: 10000,
+},
+
+resultRow: {
+  flexDirection: "row",
+  alignItems: "center",
+  marginBottom: hp(13),
+},
+
+resultLabel: {
+  marginLeft: wp(8),
+  fontSize: wp(18),
+  color: "#E5E5E5",
+  fontFamily: "Pretendard-Medium",
+},
+
+resultValue: {
+  marginLeft: "auto",
+  fontSize: wp(18),
+  color: "#FFFFFF",
+  fontFamily: "Pretendard-SemiBold",
+},
+
+
 });
 
 
-// 메인 카드 스타일 (Figma 디자인 기준)
-const mainCardStyles = StyleSheet.create({
-  container: {
-    width: wp(337),
-    minHeight: hp(822),
-    alignSelf: "center",
-    marginTop: hp(24),
-    backgroundColor: "#FFFFFF",
-    borderRadius: wp(16),
-    borderWidth: wp(1),
-    borderColor: "#EAE5E3",
-    paddingHorizontal: wp(20),
-    paddingTop: hp(24),
-    paddingBottom: hp(20),
-    // 그림자 효과 (Figma 기준)
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: wp(2),
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: wp(8),
-    elevation: 4, // Android
-  },
-  goalText: {
-    fontSize: wp(24),
-    fontWeight: "700",
-    color: "#49393A",
-    fontFamily: "Pretendard-Bold",
-    textAlign: "center",
-    letterSpacing: wp(-0.6),
-    lineHeight: hp(33.6),
-  },
-  goalLabel: {
-    fontWeight: "600",
-    color: "#7F6236",
-    fontFamily: "Pretendard-SemiBold",
-  },
-  goalPercent: {
-    color: "#FE9800",
-    fontWeight: "600",
-    fontFamily: "Pretendard-Bold",
-  },
-  carrotBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#FFF3E0",
-    borderRadius: wp(999),
-    paddingHorizontal: wp(12),
-    paddingVertical: hp(6),
-    gap: wp(6),
-    alignSelf: "center",
-    marginTop: hp(16),
-  },
-  carrotIcon: {
-    width: wp(8.707),
-    height: hp(16),
-  },
-  carrotText: {
-    fontSize: wp(16),
-    fontWeight: "700",
-    color: "#FFA927",
-    fontFamily: "Pretendard-Bold",
-    letterSpacing: wp(-0.4),
-    lineHeight: hp(22.4),
-  },
-  characterContainer: {
-    width: wp(280), // width만 지정
-    aspectRatio: 150 / 128, // 원본 비율 유지 (150:128)
-    alignSelf: "center",
-    position: "relative",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  characterImage: {
-    width: "100%",
-    height: "100%",
-  },
-  mapContainer: {
-    width: "100%",
-    height: hp(200),
-    marginTop: hp(20),
-    borderRadius: wp(12),
-    overflow: "hidden",
-    backgroundColor: "#F5F5F5",
-  },
-  mapImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: wp(12),
-  },
-  statsCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: wp(16),
-    paddingHorizontal: wp(18),
-    paddingVertical: hp(20),
-    marginTop: hp(-15),
-    width: "100%",
-    alignSelf: "center",
-  },
-  statRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    minHeight: hp(32),
-    paddingVertical: hp(4),
-  },
-  statLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: wp(8),
-  },
-  statIcon: {
-    width: wp(18),
-    height: wp(18),
-  },
-  sweatIcon: {
-    fontSize: wp(18),
-    width: wp(18),
-    height: wp(18),
-    textAlign: "center",
-  },
-  statLabelText: {
-    fontSize: wp(18),
-    fontWeight: "600",
-    color: "#767676",
-    fontFamily: "Pretendard-Medium",
-    letterSpacing: wp(-0.45),
-    lineHeight: hp(25.2),
-  },
-  statValue: {
-    fontSize: wp(18),
-    fontWeight: "600",
-    color: "#F57800",
-    fontFamily: "Pretendard-Bold",
-    letterSpacing: wp(-0.45),
-    lineHeight: hp(25.2),
-  },
-  statDivider: {
-    height: hp(1),
-    backgroundColor: "#EAE5E3",
-    marginVertical: hp(8),
-    marginHorizontal: wp(-18),
-  },
-  shareButton: {
-    alignSelf: "center",
-    marginTop: hp(20),
-    alignItems: "center",
-  },
-  shareButtonText: {
-    fontSize: wp(16),
-    fontWeight: "600",
-    color: "#C1B9B0",
-    fontFamily: "Pretendard-SemiBold",
-    letterSpacing: wp(-0.4),
-    lineHeight: hp(22.4),
-    textDecorationLine: "underline",
-  },
-  saveImageButton: {
-    alignSelf: "center",
-    marginTop: hp(8),
-    alignItems: "center",
-  },
-  saveImageButtonText: {
-    fontSize: wp(16),
-    fontWeight: "600",
-    color: "#C1B9B0",
-    fontFamily: "Pretendard-SemiBold",
-    letterSpacing: wp(-0.4),
-    lineHeight: hp(22.4),
-    textDecorationLine: "underline",
-    
-    
-  },
-});
+
 
