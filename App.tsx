@@ -3,11 +3,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import AppNavigator from './src/navigation/BottomTabs';
 import { Text, View } from "react-native";
 import { useFonts } from "expo-font"
-import * as SplashScreen from 'expo-splash-screen';
-import { useCallback, useEffect } from 'react';
-
-// Keep the splash screen visible while we fetch resources
-SplashScreen.preventAutoHideAsync();
+import { useEffect, useState } from 'react';
+import CustomSplashScreen from './src/components/SplashScreen';
 
 // Text 기본 폰트 오버라이드 (모든 Text에 Pretendard-Regular 적용)
 const defaultRender = Text.render;
@@ -31,18 +28,35 @@ export default function App() {
     "Pretendard-Thin": require("./assets/fonts/Pretendard-Thin.otf"),
   });
 
-  const onLayoutRootView = useCallback(async () => {
-    if (fontsLoaded || fontError) {
-      await SplashScreen.hideAsync();
+  const [showSplash, setShowSplash] = useState(true);
+
+  useEffect(() => {
+    async function prepare() {
+      try {
+        // 폰트가 로드될 때까지 대기
+        if (fontsLoaded || fontError) {
+          // 최소 1초 동안 스플래시 표시
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          setShowSplash(false);
+        }
+      } catch (e) {
+        console.warn(e);
+        setShowSplash(false);
+      }
     }
+
+    prepare();
   }, [fontsLoaded, fontError]);
 
-  if (!fontsLoaded && !fontError) {
-    return null;
+  // 스플래시 화면 표시 중
+  if (showSplash) {
+    return <CustomSplashScreen />;
   }
 
+  // 앱 로드 완료
   return (
-    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+    <View style={{ flex: 1 }}>
       <NavigationContainer>
         <AppNavigator />
       </NavigationContainer>
