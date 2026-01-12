@@ -1,6 +1,6 @@
 // src/tabs/HomeTab.tsx
 import React, { useState } from "react";
-import { View, Text, Pressable, StyleSheet, Dimensions, Image } from "react-native";
+import { View, Text, Pressable, StyleSheet, Dimensions, Image, ScrollView, Platform } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -64,10 +64,17 @@ export default function HomeTab() {
       {/* 구분선 - Figma: bg-[#ceb79a] h-[0.3px] top-[529px] */}
       <View style={[styles.divider, { top: hp(529) }]} />
 
-      <SafeAreaView edges={["top", "left", "right"]} style={[styles.content, { paddingTop: insets.top }]}>
-        
-        {/* 코인 아이콘 + 온도 - Figma: left-[27px] top-[58px] */}
-        <View style={[styles.coinTempContainer, { left: wp(27), top: hp(58) }]}>
+      <View style={Platform.OS === 'web' ? styles.webContainer : styles.flex1}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[
+            styles.content,
+            { paddingTop: insets.top, minHeight: hp(FIGMA_HEIGHT) }, // Set minHeight based on Figma height
+          ]}
+        >
+          
+          {/* 코인 아이콘 + 온도 - Figma: left-[27px] top-[58px] */}
+          <View style={[styles.coinTempContainer, { left: wp(27), top: hp(58) }]}>
           <CoinIcon width={wp(16)} height={wp(16)} />
           <Text style={styles.temperatureText}>{temperature}℃</Text>
         </View>
@@ -213,7 +220,8 @@ export default function HomeTab() {
           </Pressable>
         )}
 
-      </SafeAreaView>
+        </ScrollView>
+      </View>
     </View>
   );
 }
@@ -222,6 +230,15 @@ const styles = StyleSheet.create({
   container: { 
     flex: 1, 
     backgroundColor: "#FFFFFF" 
+  },
+  webContainer: {
+    maxWidth: 480,
+    alignSelf: 'center',
+    flex: 1,
+    width: '100%',
+  },
+  flex1: {
+    flex: 1,
   },
 
   backgroundGradient: {
