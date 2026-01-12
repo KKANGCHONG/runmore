@@ -127,9 +127,13 @@ const RunMap = forwardRef<RunMapRef, RunMapProps>(
 RunMap.displayName = "RunMap";
 
 const styles: React.CSSProperties = {
-  flex: 1,
-  height: "100%",
+  // flex: 1, // flex는 제거합니다.
+  position: "absolute", // 핵심 1: 문서 흐름에서 떼어내어 절대 위치로 변경
+  top: 0,
+  left: 0,
   width: "100%",
+  height: "100%", // 화면 전체를 꽉 채움
+  zIndex: 0,      // 핵심 2: 다른 컴포넌트(버튼, 패널)보다 뒤로 보냄
 } as const;
 
 export default RunMap;
