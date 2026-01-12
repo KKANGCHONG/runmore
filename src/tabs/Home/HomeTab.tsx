@@ -39,7 +39,7 @@ export default function HomeTab() {
   const level = 1;
   const characterName = "뚱띠토끼";
   const carrotCount = 78;
-  const userName = "다인";
+  const userName = "믕재";
   const appointmentMessage = `${userName}님, 오늘 오후 3시에 3km 뛰기로 했어요!`;
   
   // 레벨 진행률 계산 (예시: 75%)
@@ -146,9 +146,9 @@ export default function HomeTab() {
               },
             ]}
           >
-            <SpeakerIcon width={wp(16)} height={wp(16)} />
+            <SpeakerIcon width={wp(32)} height={wp(32)} />
             <Text style={styles.appointmentBannerText}>{appointmentMessage}</Text>
-            <Ionicons name="chevron-forward" size={wp(12)} color="#A1968B" />
+            <Ionicons name="chevron-forward" size={wp(32)} color="#A1968B" />
           </View>
         )}
 
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
   },
 
   appointmentBannerText: {
-    fontSize: wp(14),
+    fontSize: wp(10),
     fontWeight: "600",
     color: "#4D4D4D", // Figma: gray/8
     fontFamily: "Pretendard-SemiBold",
