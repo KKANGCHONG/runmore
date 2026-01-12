@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { View, Alert } from "react-native";
-import MapView, { Marker, Polyline, PROVIDER_GOOGLE } from "react-native-maps";
 import * as Location from "expo-location";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import InRunOverlay from "../../components/run/InRunOverlay";
@@ -8,6 +7,7 @@ import RunCompleteScreen from "./RunCompleteScreen";
 import { polylineDistance } from "../../components/run/utils/geo";
 import { calcBread } from "../../components/run/utils/carrot";
 import { BlurView } from "expo-blur";
+import RunMap, { RunMapRef } from "../../components/run/RunMap";
 
 // 마커 이미지는 나중에 추가 예정
 // import MarkerImg from "../../../assets/Images/marker.png";
@@ -69,7 +69,7 @@ export default function RunTab() {
   const route = useRoute<RouteProp<RunTabRouteParams, "Run">>();
   const autoStart = route.params?.autoStart ?? false;
 
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<RunMapRef>(null);
   const [state, setState] = useState<RunState>("idle");
   const [path, setPath] = useState<LatLng[]>([]);
   const [startTs, setStartTs] = useState<number | null>(null);
@@ -201,48 +201,18 @@ export default function RunTab() {
 
   return (
     <View style={{ flex: 1 }}>
-      <MapView
+      <RunMap
         ref={mapRef}
-        style={{ flex: 1 }}
-        provider={PROVIDER_GOOGLE}
+        path={state !== "idle" ? path : []}
+        breadPoints={breadPoints}
+        here={here}
         initialRegion={{
           latitude: here?.latitude ?? 37.5665,
           longitude: here?.longitude ?? 126.9780,
           latitudeDelta: 0.01,
           longitudeDelta: 0.01,
         }}
-        showsUserLocation={false}
-        followsUserLocation={false}
-        showsMyLocationButton={false}
-      >
-        {/* 경로 선: 마커 아래로 */}
-        {state !== "idle" && path.length >= 2 ? (
-          <Polyline coordinates={path} strokeWidth={10} strokeColor="#FFD360" zIndex={0} />
-        ) : null}
-
-        {/* 🥖 빵 마커들 */}
-        {breadPoints.map((pt, idx) => (
-          <Marker
-            key={`bread-${idx}-${pt.latitude}-${pt.longitude}`}
-            coordinate={pt}
-            anchor={{ x: 0.5, y: 0.5 }}
-            zIndex={9}
-          >
-            <View style={{ width: 20, height: 20, backgroundColor: "#FFD360", borderRadius: 10 }} />
-          </Marker>
-        ))}
-
-        {/* 현재 위치 마커 */}
-        {here ? (
-          <Marker
-            coordinate={here}
-            anchor={{ x: 0.5, y: 0.5 }}
-            zIndex={10}
-          >
-            <View style={{ width: 24, height: 24, backgroundColor: "#FF8A00", borderRadius: 12 }} />
-          </Marker>
-        ) : null}
-      </MapView>
+      />
 
       {(state === "running" || state === "paused") ? (
         <InRunOverlay
