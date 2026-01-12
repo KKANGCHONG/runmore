@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { View, Alert } from "react-native";
+import { View, Alert, Modal, Text, Pressable, StyleSheet, Dimensions, Platform, TouchableWithoutFeedback } from "react-native";
 import * as Location from "expo-location";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import InRunOverlay from "../../components/run/InRunOverlay";
@@ -9,9 +9,17 @@ import { calcBread } from "../../components/run/utils/carrot";
 import { BlurView } from "expo-blur";
 import RunMap, { RunMapRef } from "../../components/run/RunMap";
 
-// 마커 이미지는 나중에 추가 예정
-// import MarkerImg from "../../../assets/Images/marker.png";
-// import BreadImg from "../../../assets/Images/bread.png";
+// 화면 비율 계산 (Figma 기준)
+const FIGMA_WIDTH = 390;
+const FIGMA_HEIGHT = 844;
+const { width: WINDOW_WIDTH, height: WINDOW_HEIGHT } = Dimensions.get("window");
+
+// 웹 대응: 너무 넓어지지 않게 제한
+const SCREEN_WIDTH = Platform.OS === 'web' ? Math.min(WINDOW_WIDTH, 480) : WINDOW_WIDTH;
+const SCREEN_HEIGHT = WINDOW_HEIGHT;
+
+const wp = (px: number) => (px / FIGMA_WIDTH) * SCREEN_WIDTH;
+const hp = (px: number) => (px / FIGMA_HEIGHT) * SCREEN_HEIGHT;
 
 type LatLng = { latitude: number; longitude: number };
 type RunState = "idle" | "running" | "paused" | "finished";
@@ -78,6 +86,12 @@ export default function RunTab() {
   const [watchSub, setWatchSub] = useState<Location.LocationSubscription | null>(null);
   const [tick, setTick] = useState(0);
 
+  // 모달 표시 여부
+  const [showStartModal, setShowStartModal] = useState(true);
+  
+  // [추가] 선택된 모드 상태 ('immediate' | 'route' | null)
+  const [selectedMode, setSelectedMode] = useState<'immediate' | 'route' | null>(null);
+
   const [breadPoints, setBreadPoints] = useState<LatLng[]>([]);
   const [targets, setTargets] = useState<{ km: number; count: number }[]>(genNextTrio(0));
   const [fired, setFired] = useState<Record<string, number>>({});
@@ -95,6 +109,26 @@ export default function RunTab() {
     setWatchSub(sub);
   }, []);
 
+  // [수정] 모달 옵션 선택 핸들러
+  const handleOptionPress = (mode: 'immediate' | 'route') => {
+    setSelectedMode(mode);
+
+    if (mode === 'immediate') {
+      // 0.3초 뒤에 시작 (선택 인터랙션 보여주기 위함)
+      setTimeout(() => {
+        setShowStartModal(false);
+        startRun();
+        // 실행 후 선택 상태 초기화 (다음에 돌아왔을 때를 위해)
+        setTimeout(() => setSelectedMode(null), 500); 
+      }, 300);
+    } else {
+      // 루트 설정 (준비 중)
+      setTimeout(() => {
+         Alert.alert("준비 중", "루트 설정 기능은 준비 중입니다.");
+      }, 100);
+    }
+  };
+
   useEffect(() => {
     (async () => {
       const { status } = await Location.requestForegroundPermissionsAsync();
@@ -106,16 +140,9 @@ export default function RunTab() {
       const here: LatLng = { latitude: cur.coords.latitude, longitude: cur.coords.longitude };
       mapRef.current?.animateCamera({ center: here, zoom: 16 });
       setPath([here]);
-
-      // autoStart가 true이면 즉시 러닝 시작
-      if (autoStart) {
-        setTimeout(() => {
-          startRun();
-        }, 500); // 약간의 딜레이를 두어 지도가 로드된 후 시작
-      }
     })();
     return () => { watchSub?.remove(); };
-  }, [autoStart, startRun]);
+  }, [startRun]);
 
   useEffect(() => {
     if (state !== "running" || !startTs) return;
@@ -214,6 +241,68 @@ export default function RunTab() {
         }}
       />
 
+      {/* 러닝 시작 방식 선택 모달 */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showStartModal && state === "idle"}
+        onRequestClose={() => setShowStartModal(false)}
+      >
+        <TouchableWithoutFeedback onPress={() => {}}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              
+              <Text style={styles.modalTitle}>어떤 방식으로 시작할까요?</Text>
+              
+              {/* 옵션 1: 지금 위치에서 바로 시작 */}
+              <Pressable 
+                style={[
+                  styles.modalOptionBox,
+                  selectedMode === 'immediate' && styles.selectedOptionBox // 선택 시 스타일 변경
+                ]}
+                onPress={() => handleOptionPress('immediate')}
+              >
+                <View style={[
+                  styles.radioCircle,
+                  selectedMode === 'immediate' && styles.selectedRadioCircle
+                ]}>
+                  {selectedMode === 'immediate' && <View style={styles.radioInnerCircle} />}
+                </View>
+                <Text style={[
+                  styles.optionTitle,
+                  selectedMode === 'immediate' && styles.selectedOptionText
+                ]}>지금 위치에서 바로 시작</Text>
+              </Pressable>
+
+              {/* 옵션 2: 루트 설정 */}
+              <Pressable 
+                style={[
+                  styles.modalOptionBox, 
+                  { marginTop: hp(12) },
+                  selectedMode === 'route' && styles.selectedOptionBox
+                ]}
+                onPress={() => handleOptionPress('route')}
+              >
+                <View style={[
+                  styles.radioCircle,
+                  selectedMode === 'route' && styles.selectedRadioCircle
+                ]}>
+                  {selectedMode === 'route' && <View style={styles.radioInnerCircle} />}
+                </View>
+                <View>
+                  <Text style={[
+                    styles.optionTitle,
+                    selectedMode === 'route' && styles.selectedOptionText
+                  ]}>루트 설정</Text>
+                  <Text style={styles.optionSubtitle}>출발지와 도착지를 미리 설정</Text>
+                </View>
+              </Pressable>
+
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
       {(state === "running" || state === "paused") ? (
         <InRunOverlay
           distanceKm={distanceKm}
@@ -225,24 +314,15 @@ export default function RunTab() {
         />
       ) : null}
 
-      {/* 완료 화면 모달 - RunTab 위에 겹쳐서 표시 */}
       {state === "finished" ? (
         <>
-          {/* 블러 + 약한 디밍 오버레이 */}
           <BlurView
             tint="dark"
             intensity={20}
-            style={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              zIndex: 1000,
-              backgroundColor: "rgba(17, 17, 17, 0.5)", // 배경색 추가
-            }}
-          />
-          {/* RunCompleteScreen 모달 */}
+            style={StyleSheet.absoluteFill}
+          >
+            <View style={{flex:1, backgroundColor: "rgba(17, 17, 17, 0.5)"}} />
+          </BlurView>
           <RunCompleteScreen
             distanceKm={distanceKm}
             durationSec={durationSec}
@@ -250,6 +330,7 @@ export default function RunTab() {
             carrotCount={calcBread(distanceKm)}
             onClose={() => {
               setState("idle");
+              setShowStartModal(true);
               (navigation as any).navigate("Home");
             }}
           />
@@ -258,3 +339,89 @@ export default function RunTab() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: wp(24),
+  },
+  modalContent: {
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'flex-start',
+  },
+  modalTitle: {
+    fontSize: wp(20),
+    fontWeight: "700",
+    color: "#FFFFFF",
+    fontFamily: "Pretendard-Bold",
+    marginBottom: hp(20),
+    marginLeft: wp(4),
+  },
+  modalOptionBox: {
+    width: '100%',
+    backgroundColor: "#FFFFFF",
+    borderRadius: wp(16),
+    paddingVertical: hp(24),
+    paddingHorizontal: wp(20),
+    flexDirection: "row",
+    alignItems: "center",
+    gap: wp(16),
+    // 기본 테두리 (투명하게 해서 레이아웃 흔들림 방지)
+    borderWidth: 1.5,
+    borderColor: "transparent",
+  },
+  
+  // [추가] 선택된 박스 스타일
+  selectedOptionBox: {
+    backgroundColor: "#FFF3E0", // 연한 주황 배경
+    borderColor: "#FB8800",     // 주황 테두리
+  },
+
+  radioCircle: {
+    width: wp(24),
+    height: wp(24),
+    borderRadius: wp(12),
+    borderWidth: 1.5,
+    borderColor: "#E5E5E5",
+    backgroundColor: "#FFFFFF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  // [추가] 선택된 라디오 버튼 스타일
+  selectedRadioCircle: {
+    borderColor: "#FB8800",
+  },
+
+  // [추가] 라디오 버튼 내부 원
+  radioInnerCircle: {
+    width: wp(12),
+    height: wp(12),
+    borderRadius: wp(6),
+    backgroundColor: "#FB8800",
+  },
+
+  optionTitle: {
+    fontSize: wp(16),
+    fontWeight: "600",
+    color: "#333333",
+    fontFamily: "Pretendard-SemiBold",
+  },
+
+  // [추가] 선택된 텍스트 스타일
+  selectedOptionText: {
+    color: "#FB8800",
+  },
+
+  optionSubtitle: {
+    fontSize: wp(13),
+    fontWeight: "400",
+    color: "#999999",
+    fontFamily: "Pretendard-Regular",
+    marginTop: hp(4),
+  },
+});
