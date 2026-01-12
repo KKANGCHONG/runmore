@@ -1,15 +1,18 @@
 import React from 'react';
-import { View, Image, StyleSheet, Platform, Dimensions } from 'react-native';
+import { View, StyleSheet, Platform, Dimensions } from 'react-native';
+import SplashSvg from '../../assets/splash.svg';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 export default function SplashScreen() {
   return (
     <View style={styles.container}>
-      <Image
-        source={require('../../assets/splash.png')}
+
+      <SplashSvg 
+        width="100%" 
+        height="100%" 
+        preserveAspectRatio="xMidYMid slice"
         style={styles.image}
-        resizeMode="cover"
       />
     </View>
   );
@@ -18,7 +21,7 @@ export default function SplashScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#ffffff', 
     width: SCREEN_WIDTH,
     height: SCREEN_HEIGHT,
     ...(Platform.OS === 'web' && {
@@ -35,10 +38,5 @@ const styles = StyleSheet.create({
   image: {
     width: '100%',
     height: '100%',
-    ...(Platform.OS === 'web' && {
-      width: '100vw',
-      height: '100vh',
-      objectFit: 'cover',
-    }),
   },
 });

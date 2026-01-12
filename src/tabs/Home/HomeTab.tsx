@@ -148,7 +148,7 @@ export default function HomeTab() {
           >
             <SpeakerIcon width={wp(32)} height={wp(32)} />
             <Text style={styles.appointmentBannerText}>{appointmentMessage}</Text>
-            <Ionicons name="chevron-forward" size={wp(26)} color="#A1968B" />
+            <Ionicons name="chevron-forward" size={wp(12)} color="#A1968B" />
           </View>
         )}
 
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
 
   characterContainer: {
     position: "absolute",
-    width: wp(230),
+    width: wp(238),
     height: wp(238),
     transform: [{ translateX: -wp(119) }], // 중앙 정렬
   },
