@@ -146,7 +146,7 @@ export default function HomeTab() {
               },
             ]}
           >
-            <SpeakerIcon width={wp(32)} height={wp(32)} />
+            <SpeakerIcon width={wp(16)} height={wp(16)} />
             <Text style={styles.appointmentBannerText}>{appointmentMessage}</Text>
             <Ionicons name="chevron-forward" size={wp(12)} color="#A1968B" />
           </View>
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
   },
 
   appointmentBannerText: {
-    fontSize: wp(10),
+    fontSize: wp(14),
     fontWeight: "600",
     color: "#4D4D4D", // Figma: gray/8
     fontFamily: "Pretendard-SemiBold",

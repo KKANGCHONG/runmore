@@ -1,12 +1,19 @@
 import 'react-native-gesture-handler';
-import { NavigationContainer } from '@react-navigation/native';
-import AppNavigator from './src/navigation/BottomTabs';
+import React, { useEffect, useState } from 'react';
 import { Text, View } from "react-native";
-import { useFonts } from "expo-font"
-import { useEffect, useState } from 'react';
-import CustomSplashScreen from './src/components/SplashScreen';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack'; // [추가] Stack Navigator
+import { useFonts } from "expo-font";
 
-// Text 기본 폰트 오버라이드 (모든 Text에 Pretendard-Regular 적용)
+import AppNavigator from './src/navigation/BottomTabs';
+import AppointmentCreateScreen from './src/tabs/Calendar/AppointmentCreateScreen';
+import CustomSplashScreen from './src/components/SplashScreen';
+import TotalRecordScreen from "./src/tabs/Calendar/TotalRecordScreen";
+
+// Stack Navigator 생성
+const Stack = createNativeStackNavigator();
+
+// Text 기본 폰트 오버라이드
 const defaultRender = Text.render;
 Text.render = function render(props, ref) {
   return defaultRender.call(this, {
@@ -33,11 +40,8 @@ export default function App() {
   useEffect(() => {
     async function prepare() {
       try {
-        // 폰트가 로드될 때까지 대기
         if (fontsLoaded || fontError) {
-          // 최소 1초 동안 스플래시 표시
           await new Promise(resolve => setTimeout(resolve, 1000));
-          
           setShowSplash(false);
         }
       } catch (e) {
@@ -45,20 +49,27 @@ export default function App() {
         setShowSplash(false);
       }
     }
-
     prepare();
   }, [fontsLoaded, fontError]);
 
-  // 스플래시 화면 표시 중
   if (showSplash) {
     return <CustomSplashScreen />;
   }
 
-  // 앱 로드 완료
   return (
     <View style={{ flex: 1 }}>
       <NavigationContainer>
-        <AppNavigator />
+        {/* [수정] Stack Navigator로 감싸기 */}
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          
+          {/* 1. 메인 탭 화면 (홈, 캘린더 등) */}
+          <Stack.Screen name="MainTabs" component={AppNavigator} />
+          
+          {/* 2. 새로 추가한 약속 생성 화면 (탭 위에 덮어씌워짐) */}
+          <Stack.Screen name="AppointmentCreate" component={AppointmentCreateScreen} />
+          <Stack.Screen name="TotalRecord" component={TotalRecordScreen} options={{ headerShown: false }} />
+          
+        </Stack.Navigator>
       </NavigationContainer>
     </View>
   );
