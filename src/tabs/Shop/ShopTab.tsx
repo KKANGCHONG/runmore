@@ -1,270 +1,342 @@
-import React, { useMemo, useState } from "react";
-import { SafeAreaView, View, Text, FlatList, Pressable } from "react-native";
+import React, { useState } from "react";
+import { View, Text, StyleSheet, Dimensions, Platform, Pressable, ScrollView, Image } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { theme } from "../../styles/theme"; // 기존 테마 사용 가정
-import { g } from "../../styles/globalStyles"; // 컨테이너 padding 등 공용
-import Card from "../../components/ui/Card";    // 기존 Card 컴포넌트
-import SectionHeader from "../../components/ui/SectionHeader"; // 옵션
 
-type MonthKey = `${number}-${number}`; // e.g., "2025-07"
+// SVG 이미지 import
+import CarrotIcon from "../../../assets/figma/carrot_small.svg";
+import ShopRabbitImage from "../../../assets/figma/shop_rabbit_image.svg";
+import StarbucksImage from "../../../assets/figma/starbucks_image.svg";
 
-type Product = {
-  id: string;
-  title: string;
-  costBread: number;
-};
+const FIGMA_WIDTH = 390;
+const FIGMA_HEIGHT = 844;
+const { width: WINDOW_WIDTH, height: WINDOW_HEIGHT } = Dimensions.get("window");
 
-type Entry = {
-  id: string;
-  monthKey: MonthKey;
-  title: string;
-  appliedAt: string; // ISO
-  neededBread: number;
-  status: "ongoing" | "win" | "ended";
-  resultDate?: string; // 발표일
-};
+const SCREEN_WIDTH = Platform.OS === 'web' ? Math.min(WINDOW_WIDTH, 480) : WINDOW_WIDTH;
+const SCREEN_HEIGHT = WINDOW_HEIGHT;
 
-// ---------- 더미 데이터 ----------
-const MOCK_PRODUCTS: Product[] = [
-  { id: "p1", title: "스타벅스 아메리카노", costBread: 10 },
-  { id: "p2", title: "투썸 케이크", costBread: 20 },
-  { id: "p3", title: "○○○○○", costBread: 25 },
+const wp = (px: number) => (px / FIGMA_WIDTH) * SCREEN_WIDTH;
+const hp = (px: number) => (px / FIGMA_HEIGHT) * SCREEN_HEIGHT;
+
+// 더미 데이터
+const CATEGORIES = ["전체", "건강", "체중조절", "러닝용품", "전자기기"];
+const PRODUCTS = [
+  { id: 1, title: "스타벅스 아이스 카페...", price: 10, deadline: "마감 12일 전" },
+  { id: 2, title: "스타벅스 아이스 카페...", price: 10, deadline: "마감 12일 전" },
+  { id: 3, title: "스타벅스 아이스 카페...", price: 10, deadline: "마감 12일 전" },
+  { id: 4, title: "스타벅스 아이스 카페...", price: 10, deadline: "마감 12일 전" },
 ];
 
-const MOCK_ENTRIES: Entry[] = [
-  { id: "e1", monthKey: "2025-07", title: "이벤트 A", appliedAt: "2025-07-05", neededBread: 10, status: "ongoing", resultDate: "2025-07-31" },
-  { id: "e2", monthKey: "2025-07", title: "이벤트 B", appliedAt: "2025-07-11", neededBread: 20, status: "ongoing", resultDate: "2025-07-30" },
-  { id: "e3", monthKey: "2025-07", title: "이벤트 C", appliedAt: "2025-07-18", neededBread: 15, status: "ongoing", resultDate: "2025-08-01" },
-  { id: "e4", monthKey: "2025-07", title: "이벤트 D", appliedAt: "2025-07-03", neededBread: 10, status: "win", resultDate: "2025-07-25" },
-  { id: "e5", monthKey: "2025-06", title: "이벤트 E", appliedAt: "2025-06-10", neededBread: 10, status: "ended", resultDate: "2025-06-28" },
-];
-
-function ymKey(d: Date): MonthKey {
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}` as MonthKey;
-}
-function labelYM(d: Date) {
-  return `${d.getMonth() + 1}월`;
-}
-
-// ---------- 작은 공용 컴포넌트 ----------
-const Row = ({ children, style }: any) => (
-  <View style={[{ flexDirection: "row", alignItems: "center" }, style]}>{children}</View>
-);
-
-const Divider = () => <View style={{ height: 12 }} />;
-
-const GreyBox: React.FC<{ children: React.ReactNode; style?: any }> = ({ children, style }) => (
-  <View style={[{ backgroundColor: "#E5E5E5", borderRadius: 8, padding: 14 }, style]}>{children}</View>
-);
-
-// 상품 카드
-const ProductCard: React.FC<{ item: Product; onApply: (p: Product) => void }> = ({ item, onApply }) => (
-  <Pressable onPress={() => onApply(item)}>
-    <GreyBox style={{ marginBottom: 12 }}>
-      <Row style={{ justifyContent: "space-between" }}>
-        <Text style={{ fontSize: 16, fontWeight: "700" }}>{item.title}</Text>
-        <Text style={{ fontWeight: "700" }}>{item.costBread}빵</Text>
-      </Row>
-      <Row style={{ justifyContent: "flex-end", marginTop: 6 }}>
-        <Pressable
-          onPress={() => onApply(item)}
-          style={{ paddingHorizontal: 14, paddingVertical: 8, backgroundColor: "#444", borderRadius: 8 }}
-        >
-          <Text style={{ color: "white", fontWeight: "700" }}>응모하기</Text>
-        </Pressable>
-      </Row>
-    </GreyBox>
-  </Pressable>
-);
-
-// 월 내비게이터
-const MonthNavigator: React.FC<{ month: Date; onChange: (d: Date) => void; centerBold?: boolean }> = ({
-  month,
-  onChange,
-  centerBold = true,
-}) => (
-  <Row style={{ justifyContent: "space-between", marginTop: 8 }}>
-    <Pressable onPress={() => onChange(new Date(month.getFullYear(), month.getMonth() - 1, 1))}>
-      <Ionicons name="chevron-back" size={20} />
-    </Pressable>
-    <Text style={{ fontSize: 16, fontWeight: centerBold ? "800" : "600" }}>{labelYM(month)}</Text>
-    <Pressable onPress={() => onChange(new Date(month.getFullYear(), month.getMonth() + 1, 1))}>
-      <Ionicons name="chevron-forward" size={20} />
-    </Pressable>
-  </Row>
-);
-
-// 세그먼트
-const Segmented: React.FC<{ value: string; onChange: (v: "ongoing" | "win" | "ended") => void }> = ({
-  value,
-  onChange,
-}) => {
-  const Tab = ({ k, label }: any) => {
-    const active = value === k;
-    return (
-      <Pressable onPress={() => onChange(k)} style={{ marginRight: 22 }}>
-        <Text style={{ fontWeight: active ? "800" : "600", color: active ? "#111" : "#777" }}>{label}</Text>
-      </Pressable>
-    );
-  };
-  return (
-    <Row style={{ marginTop: 12 }}>
-      <Tab k="ongoing" label="응모 3" />
-      <Tab k="win" label="당첨 1" />
-      <Tab k="ended" label="종료 0" />
-    </Row>
-  );
-};
-
-// 응모/당첨/종료 리스트 아이템
-const EntryItem: React.FC<{ e: Entry }> = ({ e }) => (
-  <GreyBox style={{ marginBottom: 12 }}>
-    <Row style={{ justifyContent: "space-between" }}>
-      <Text style={{ fontWeight: "700" }}>이벤트 명</Text>
-      <Text style={{ fontWeight: "700" }}>응모 날짜</Text>
-    </Row>
-    <Row style={{ justifyContent: "space-between", marginTop: 6 }}>
-      <Text>{e.title}</Text>
-      <Text>{e.appliedAt}</Text>
-    </Row>
-
-    <Row style={{ justifyContent: "space-between", marginTop: 12 }}>
-      <Text style={{ fontWeight: "700" }}>결과 발표 날짜</Text>
-      <Text style={{ fontWeight: "700" }}>빵 수</Text>
-    </Row>
-    <Row style={{ justifyContent: "space-between", marginTop: 6 }}>
-      <Text>{e.resultDate ?? "-"}</Text>
-      <Text>{e.neededBread}</Text>
-    </Row>
-  </GreyBox>
-);
-
-// 빈 상태
-const EmptyState: React.FC<{ text: string }> = ({ text }) => (
-  <View style={{ flex: 1, alignItems: "center", paddingTop:80 }}>
-    <Text style={{ color: "#888" }}>{text}</Text>
-  </View>
-);
-
-// ---------- 메인 화면 ----------
 export default function ShopTab() {
-  // 모드: 'shop'(초기) / 'status'(응모현황 화면)
-  const [mode, setMode] = useState<"shop" | "status">("shop");
-  const [seg, setSeg] = useState<"ongoing" | "win" | "ended">("ongoing");
-  const [month, setMonth] = useState<Date>(new Date(2025, 6, 1)); // 예시로 7월
+  const insets = useSafeAreaInsets();
+  const navigation = useNavigation();
+  const [selectedCategory, setSelectedCategory] = useState("전체");
 
-  const monthKey = ymKey(month);
-
-  const entriesOfMonth = useMemo(
-    () => MOCK_ENTRIES.filter((e) => e.monthKey === monthKey),
-    [monthKey]
-  );
-  const counts = useMemo(
-    () => ({
-      ongoing: entriesOfMonth.filter((e) => e.status === "ongoing").length,
-      win: entriesOfMonth.filter((e) => e.status === "win").length,
-      ended: entriesOfMonth.filter((e) => e.status === "ended").length,
-    }),
-    [entriesOfMonth]
-  );
-
-  const list = entriesOfMonth.filter((e) => e.status === seg);
-
-  const handleApply = (p: Product) => {
-    // TODO: 포인트 차감 + 응모 API 연결
-    console.log("apply", p.title);
-    alert(`${p.title}에 응모했습니다!`);
-  };
-
-  // ---------- 초기 상점 화면 ----------
-  if (mode === "shop") {
-    return (
-      <SafeAreaView style={[g.safe, { flex: 1 }]}>
-        <View style={[g.screenContainer, { flex: 1, paddingTop: 50 }]}>
-          <Row style={{ justifyContent: "space-between" }}>
-            <Text style={{ fontWeight: "800" }}>내 현황</Text>
-            <Text style={{ fontWeight: "800" }}>빵 포인트 개수</Text>
-          </Row>
-
-          <MonthNavigator month={month} onChange={setMonth} />
-
-          {/* 응모/당첨 현황 카드 */}
-          <Pressable onPress={() => { setMode("status"); setSeg("ongoing"); }}>
-            <GreyBox style={{ marginTop: 12 }}>
-              <Row style={{ justifyContent: "space-between" }}>
-                <Text style={{ fontWeight: "800" }}>응모현황</Text>
-                <Text style={{ fontWeight: "800" }}>당첨현황</Text>
-              </Row>
-              <Row style={{ justifyContent: "space-between", marginTop: 10 }}>
-                <Text style={{ fontSize: 18, fontWeight: "800" }}>{counts.ongoing}</Text>
-                <Text style={{ fontSize: 18, fontWeight: "800" }}>{counts.win}</Text>
-              </Row>
-            </GreyBox>
-          </Pressable>
-
-          <Divider />
-
-          <SectionHeader title="상품목록" />
-          <FlatList
-            data={MOCK_PRODUCTS}
-            keyExtractor={(i) => i.id}
-            renderItem={({ item }) => <ProductCard item={item} onApply={handleApply} />}
-            contentContainerStyle={{ paddingTop: 8, paddingBottom: 32 }}
-          />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  // ---------- 응모 현황 화면 (세그먼트) ----------
   return (
-    <SafeAreaView style={[g.safe, { flex: 1 }]}>
-      <View style={[g.screenContainer, { flex: 1, paddingTop: 50 }]}>
-        <MonthNavigator month={month} onChange={setMonth} />
-
-        <Row style={{ marginTop: 8 }}>
-          <Pressable onPress={() => setSeg("ongoing")}>
-            <Text style={{ color: seg === "ongoing" ? "#111" : "#888", fontWeight: seg === "ongoing" ? "800" : "600" }}>
-              응모 {counts.ongoing}
-            </Text>
+    <View style={styles.webWrapper}>
+      <SafeAreaView edges={["top", "left", "right"]} style={styles.container}>
+        
+        {/* 헤더 */}
+        <View style={styles.header}>
+          <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
+            <Ionicons name="chevron-back" size={wp(24)} color="#49393A" />
           </Pressable>
-          <Pressable style={{ marginLeft: 22 }} onPress={() => setSeg("win")}>
-            <Text style={{ color: seg === "win" ? "#111" : "#888", fontWeight: seg === "win" ? "800" : "600" }}>
-              당첨 {counts.win}
-            </Text>
-          </Pressable>
-          <Pressable style={{ marginLeft: 22 }} onPress={() => setSeg("ended")}>
-            <Text style={{ color: seg === "ended" ? "#111" : "#888", fontWeight: seg === "ended" ? "800" : "600" }}>
-              종료 {counts.ended}
-            </Text>
-          </Pressable>
-        </Row>
-
-        <View style={{ marginTop: 12, flex: 1 }}>
-          {list.length === 0 ? (
-            <EmptyState
-              text={
-                seg === "ended"
-                  ? "응모한 이벤트 종료 내역이 없습니다"
-                  : seg === "win"
-                  ? "당첨 내역이 없습니다"
-                  : "응모 내역이 없습니다"
-              }
-            />
-          ) : (
-            <FlatList
-              data={list}
-              keyExtractor={(e) => e.id}
-              renderItem={({ item }) => <EntryItem e={item} />}
-              contentContainerStyle={{ paddingBottom: 24 }}
-            />
-          )}
+          <Text style={styles.headerTitle}>상점</Text>
+          <View style={{ width: wp(24) }} />
         </View>
 
-        <Pressable onPress={() => setMode("shop")} style={{ position: "absolute", top: 8, left: 8, padding: 8 }}>
-          <Ionicons name="chevron-back" size={22} />
-        </Pressable>
-      </View>
-    </SafeAreaView>
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+          
+          {/* 상단 히어로 섹션 */}
+          <View style={styles.heroSection}>
+            <View style={styles.heroTextContainer}>
+              <Text style={styles.heroLabel}>모든 당근 수</Text>
+              <View style={styles.carrotCountRow}>
+                <CarrotIcon width={wp(18)} height={hp(24)} style={{marginBottom: hp(4)}}/> 
+                <Text style={styles.carrotCountText}>78개</Text>
+              </View>
+            </View>
+            <ShopRabbitImage width={wp(140)} height={wp(140)} style={styles.rabbitImage} />
+          </View>
+
+          {/* 사용 가능/완료 박스 */}
+          <View style={styles.statsBox}>
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>사용 가능</Text>
+              <Text style={styles.statValue}>7</Text>
+            </View>
+            <View style={styles.statDivider} />
+            <View style={styles.statItem}>
+              <Text style={styles.statLabel}>사용 완료</Text>
+              <Text style={styles.statValue}>7</Text>
+            </View>
+          </View>
+
+          {/* 상품 목록 섹션 */}
+          <View style={styles.productSection}>
+            {/* 섹션 헤더 */}
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>상품목록</Text>
+              <Pressable style={styles.sortButton}>
+                <Text style={styles.sortText}>추천순</Text>
+                <Ionicons name="chevron-down" size={wp(14)} color="#BDBDBD" />
+              </Pressable>
+            </View>
+
+            {/* 카테고리 탭 (가로 스크롤) */}
+            <ScrollView 
+              horizontal 
+              showsHorizontalScrollIndicator={false} 
+              style={styles.categoryScroll}
+              contentContainerStyle={styles.categoryContent}
+            >
+              {CATEGORIES.map((cat) => {
+                const isSelected = selectedCategory === cat;
+                return (
+                  <Pressable 
+                    key={cat} 
+                    style={[styles.categoryChip, isSelected && styles.categoryChipSelected]}
+                    onPress={() => setSelectedCategory(cat)}
+                  >
+                    <Text style={[styles.categoryText, isSelected && styles.categoryTextSelected]}>
+                      {cat}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </ScrollView>
+
+            {/* 상품 그리드 */}
+            <View style={styles.gridContainer}>
+              {PRODUCTS.map((item) => (
+                <View key={item.id} style={styles.productCard}>
+                  {/* 상품 이미지 영역 */}
+                  <View style={styles.imageContainer}>
+                    <StarbucksImage width={wp(80)} height={hp(120)} />
+                  </View>
+                  
+                  {/* 가격 뱃지 */}
+                  <View style={styles.priceBadge}>
+                    <CarrotIcon width={wp(10)} height={wp(10)} />
+                    <Text style={styles.priceText}>{item.price}</Text>
+                  </View>
+
+                  {/* 텍스트 정보 */}
+                  <Text style={styles.productTitle} numberOfLines={1}>{item.title}</Text>
+                  <Text style={styles.productDeadline}>{item.deadline}</Text>
+                </View>
+              ))}
+            </View>
+
+          </View>
+
+        </ScrollView>
+      </SafeAreaView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  webWrapper: { flex: 1, backgroundColor: Platform.OS === 'web' ? '#f0f0f0' : '#FFFFFF', alignItems: 'center' },
+  container: { flex: 1, width: '100%', maxWidth: 480, backgroundColor: "#FFFBF6" }, // 전체 배경색
+  
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: wp(20),
+    paddingVertical: hp(16),
+  },
+  backButton: { padding: wp(4) },
+  headerTitle: { fontSize: wp(18), fontWeight: "600", color: "#49393A", fontFamily: "Pretendard-SemiBold" },
+
+  scrollContent: { paddingBottom: hp(40) },
+
+  // 히어로 섹션
+  heroSection: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: wp(30),
+    paddingTop: hp(20),
+    paddingBottom: hp(40), // 박스가 겹치도록 공간 확보
+  },
+  heroTextContainer: {
+    justifyContent: "center",
+  },
+  heroLabel: {
+    fontSize: wp(14),
+    color: "#817D7A",
+    marginBottom: hp(8),
+    fontFamily: "Pretendard-Medium",
+  },
+  carrotCountRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: wp(6),
+  },
+  carrotCountText: {
+    fontSize: wp(28),
+    fontWeight: "700",
+    color: "#FB8800",
+    fontFamily: "Pretendard-Bold",
+  },
+  rabbitImage: {
+    // SVG 컴포넌트 스타일 (필요시 조정)
+  },
+
+  // 통계 박스
+  statsBox: {
+    flexDirection: "row",
+    backgroundColor: "#FFFFFF",
+    marginHorizontal: wp(20),
+    borderRadius: wp(16),
+    paddingVertical: hp(20),
+    marginTop: -hp(20), // 히어로 섹션과 겹치게 위로 올림
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 3,
+    alignItems: "center",
+  },
+  statItem: {
+    flex: 1,
+    alignItems: "center",
+  },
+  statLabel: {
+    fontSize: wp(14),
+    color: "#817D7A",
+    marginBottom: hp(4),
+    fontFamily: "Pretendard-Medium",
+  },
+  statValue: {
+    fontSize: wp(18),
+    fontWeight: "600",
+    color: "#49393A",
+    fontFamily: "Pretendard-SemiBold",
+  },
+  statDivider: {
+    width: 1,
+    height: hp(24),
+    backgroundColor: "#EBEBEB",
+  },
+
+  // 상품 섹션
+  productSection: {
+    marginTop: hp(32),
+    backgroundColor: "#FFFFFF", // 하단부는 흰색 배경인듯 함 (이미지 참고)
+    borderTopLeftRadius: wp(24),
+    borderTopRightRadius: wp(24),
+    paddingTop: hp(24),
+    paddingHorizontal: wp(20),
+    minHeight: hp(500),
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: hp(16),
+  },
+  sectionTitle: {
+    fontSize: wp(16),
+    fontWeight: "600",
+    color: "#282119",
+    fontFamily: "Pretendard-SemiBold",
+  },
+  sortButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: wp(2),
+  },
+  sortText: {
+    fontSize: wp(12),
+    color: "#BDBDBD",
+    fontFamily: "Pretendard-Medium",
+  },
+
+  // 카테고리 탭
+  categoryScroll: {
+    marginBottom: hp(20),
+  },
+  categoryContent: {
+    gap: wp(8),
+    paddingRight: wp(20),
+  },
+  categoryChip: {
+    paddingHorizontal: wp(16),
+    paddingVertical: hp(8),
+    borderRadius: wp(20),
+    backgroundColor: "#F7F7F7",
+  },
+  categoryChipSelected: {
+    backgroundColor: "#FFF3E0",
+  },
+  categoryText: {
+    fontSize: wp(14),
+    color: "#817D7A",
+    fontFamily: "Pretendard-Medium",
+  },
+  categoryTextSelected: {
+    color: "#FB8800",
+    fontWeight: "600",
+    fontFamily: "Pretendard-SemiBold",
+  },
+
+  // 그리드
+  gridContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    rowGap: hp(16),
+  },
+  productCard: {
+    width: (SCREEN_WIDTH - wp(55)) / 2, // 2열 그리드 계산 (패딩 고려)
+    marginBottom: hp(10),
+  },
+  imageContainer: {
+    width: "100%",
+    height: (SCREEN_WIDTH - wp(55)) / 2, // 정사각형 비율
+    backgroundColor: "#D0F0EF", // 스타벅스 배경색과 유사한 민트색
+    borderRadius: wp(16),
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: hp(12),
+    overflow: "hidden",
+  },
+  priceBadge: {
+    position: "absolute",
+    top: hp(10),
+    left: wp(10),
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: wp(8),
+    paddingVertical: hp(4),
+    borderRadius: wp(12),
+    gap: wp(4),
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  priceText: {
+    fontSize: wp(12),
+    fontWeight: "700",
+    color: "#FB8800",
+    fontFamily: "Pretendard-Bold",
+  },
+  productTitle: {
+    fontSize: wp(16),
+    fontWeight: "600",
+    color: "#282119",
+    marginBottom: hp(4),
+    fontFamily: "Pretendard-SemiBold",
+  },
+  productDeadline: {
+    fontSize: wp(12),
+    color: "#9E9E9E",
+    fontFamily: "Pretendard-Medium",
+  },
+});
